@@ -1,0 +1,64 @@
+name: Tvarka ATK API
+description: >-
+  A single REST API for Lithuanian eID authentication and qualified electronic signing (QES), plus validation,
+  timestamping and long-term-validation (LTV)/archive services. Primary ceremonies are physical smart-card reader and
+  NFC on the Lithuanian identity card (ATK); Smart-ID and Mobile-ID are optional server-side methods. eIDAS-aligned.
+url: https://tvarka-atk-api.apievangelist.com/apis.yml
+created: '2026-08-02'
+modified: '2026-08-02'
+specificationVersion: '0.21'
+tags:
+  - Authentication
+  - Digital Signature
+  - eIDAS
+  - QES
+  - Lithuania
+  - OpenAPI
+  - eID
+  - Smart-ID
+  - Mobile-ID
+  - NFC
+  - Timestamping
+  - LTV
+  - Webhooks
+  - Identity
+apis:
+  - name: Tvarka ATK API
+    description: >-
+      REST API for Lithuanian eID authentication and qualified electronic signing (QES), with validation, timestamping
+      and LTV/archive trust services. OpenAPI 3.1 contract with Auth, Sign, Pairing, Validation, LTV and Well-known
+      tags. Webhooks documented in OpenAPI webhooks block (signStatus event).
+    humanURL: https://atk.tvarka.pro/docs/
+    baseURL: https://atk.tvarka.pro/v1
+    tags:
+      - Authentication
+      - Digital Signature
+      - eIDAS
+      - QES
+      - Lithuania
+      - OpenAPI
+      - eID
+      - Smart-ID
+      - Mobile-ID
+      - NFC
+      - Timestamping
+      - LTV
+      - Webhooks
+      - Identity
+    properties:
+      - type: OpenAPI
+        url: https://atk.tvarka.pro/openapi.json
+      - type: PostmanCollection
+        url: https://atk.tvarka.pro/postman/auth.json
+      - type: PostmanCollection
+        url: https://atk.tvarka.pro/postman/sign.json
+      - type: Documentation
+        url: https://atk.tvarka.pro/docs/
+maintainers:
+  - FN: Tvarka ATK API team
+    url: https://tvarka.pro
+generated:
+  by: apis.io/add
+  model: claude-opus-4-8
+  confidence: 95
+  at: '2026-08-02T22:54:13.353Z'
