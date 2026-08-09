@@ -1,0 +1,113 @@
+generated: '2026-08-09'
+method: derived
+source: openapi/tvarka-atk-api-openapi-original.json
+docs: https://atk.tvarka.pro/docs/api/
+summary: >-
+  Two parallel resource families - an authentication request and a signing request - share one
+  ceremony shape (create, submit certificate, complete) and one state machine. A third, stateless
+  family (validation, timestamp, archive) takes a document in and returns a result without a
+  ceremony. Nothing is a collection: every read is a single-resource fetch by requestId, so there
+  are no parent/child listing relationships.
+identifiers:
+  - name: requestId
+    format: uuid
+    scope: provider (tenant)
+    note: >-
+      Server-issued at creation, path parameter on every subsequent operation of that request, and
+      echoed in error bodies. There are no typed id prefixes.
+  - name: pairingToken
+    format: opaque
+    note: >-
+      Short-lived, rotatable handoff token for completing an ATK ceremony on a phone; claimed once
+      and then unavailable (409 pairing_already_claimed) or expired (410 pairing_expired).
+  - name: downloadToken
+    format: opaque
+    note: One-off query token returned with a completed result, redeemable for the produced document.
+  - name: Idempotency-Key
+    format: 1-255 visible characters
+    scope: provider + service operation
+    note: Caller-supplied; required on the stateless trust-service operations.
+entities:
+  - name: AuthRequest
+    schema: AuthAuthRequestState
+    lifecycle_schema: AuthStatus
+    created_by: createAuthRequest
+    read_by: getAuthRequest
+    terminated_by: [completeAuth, cancelAuthRequest, deleteAuthRequest]
+    fields_of_note: [status, method, requestId, expiresAt, verificationCode]
+  - name: AuthResult
+    schema: AuthAuthResult
+    produced_by: completeAuth
+    note: The verified identity - certificate subject, method, and the verifiable assertion material.
+  - name: SignRequest
+    schema: SignSignRequestState
+    lifecycle_schema: SignStatus
+    created_by: createSignRequest
+    read_by: getSignRequest
+    terminated_by: [completeSign, cancelSignRequest, deleteSignRequest]
+    fields_of_note: [status, validation, method, requestId]
+    note: >-
+      Two independent axes - the request status (did the ceremony finish) and the advisory
+      validation axis (is the resulting signature qualified and valid). Validation failure never
+      appears on status.
+  - name: SignResult
+    schema: SignSignResult
+    produced_by: completeSign
+    downloadable_by: downloadSignedDocument
+  - name: Certificate subject
+    schema: AuthCertSubject / SignCertSubject
+    note: Parsed eID certificate subject (serialNumber e.g. PNOLT-<personal code>, country).
+  - name: Validation
+    schema: SignValidation
+    note: >-
+      Advisory axis with status (pending/passed/failed/notApplicable), a level such as
+      QUALIFIED_VALID / VALID_NOT_QUALIFIED / INDETERMINATE, and an optional report pointer.
+  - name: Pairing
+    schema: AuthPairingInfo / SignPairingInfo (hint AuthPairingHint / SignPairingHint)
+    read_by: [getAuthPairing, getSignPairing]
+    claimed_by: claimPairing
+    fields_of_note: [pairingUrl, deepLink, qrPayload]
+  - name: DocumentRef
+    schema: SignDocumentRef
+    note: Inline base64 document or a fetchable reference, host-allow-listed (403 document_ref_host_not_allowed).
+  - name: ServiceResult
+    schema: SignValidationServiceResult / SignLtvServiceResult
+    produced_by: [validateDocument, timestampDocument, archiveDocument]
+    downloadable_by: downloadServiceDocument
+  - name: JWKS
+    schema: AuthJwks
+    read_by: getJwks
+    file: well-known/tvarka-atk-api-atk-jwks.json
+  - name: Error
+    schema: AuthError / SignError (body AuthErrorBody / SignErrorBody)
+    detail: errors/tvarka-atk-api-problem-types.yml
+relationships:
+  - {from: AuthRequest, to: AuthStatus, type: has_one, via: status}
+  - {from: AuthRequest, to: AuthMethod, type: has_one, via: method}
+  - {from: AuthRequest, to: Certificate subject, type: has_one, via: subject}
+  - {from: AuthRequest, to: Error, type: has_one, via: error}
+  - {from: AuthRequest, to: Pairing, type: has_one, via: requestId}
+  - {from: AuthResult, to: Certificate subject, type: has_one, via: subject}
+  - {from: SignRequest, to: SignStatus, type: has_one, via: status}
+  - {from: SignRequest, to: Validation, type: has_one, via: validation}
+  - {from: SignRequest, to: SignMethod, type: has_one, via: method}
+  - {from: SignRequest, to: Certificate subject, type: has_one, via: subject}
+  - {from: SignRequest, to: Error, type: has_one, via: error}
+  - {from: SignRequest, to: Pairing, type: has_one, via: requestId}
+  - {from: SignResult, to: Validation, type: has_one, via: validation}
+  - {from: SignResult, to: Certificate subject, type: has_one, via: subject}
+  - {from: SignRequest, to: DocumentRef, type: has_one, via: document/documentRef}
+  - {from: ServiceResult, to: DocumentRef, type: belongs_to, via: document/documentRef}
+  - {from: Pairing, to: AuthRequest, type: belongs_to, via: requestId}
+  - {from: Error, to: AuthRequest, type: belongs_to, via: requestId}
+state_machine:
+  non_terminal: [pending, awaitingCard, awaitingCredentials, finalizing]
+  terminal_success: [done]
+  terminal_failure: [cancelled, timeout, deviceError, pinBlocked, cardRemoved, certInvalid]
+  note: >-
+    Identical enum for AuthStatus and SignStatus. awaitingCredentials is SDK-reported because CAN/PIN
+    entry is out of band on the device. Acting on a terminal request returns 409 request_terminal.
+coverage:
+  schemas: 48
+  ref_edges: 43
+  render: null

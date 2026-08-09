@@ -1,0 +1,43 @@
+generated: '2026-08-09'
+method: derived
+source: openapi/tvarka-atk-api-openapi-original.json#/webhooks
+docs: https://atk.tvarka.pro/docs/api/
+spec_type: Webhooks
+asyncapi_published: false
+asyncapi_probe:
+  - {url: 'https://atk.tvarka.pro/asyncapi.yaml', status: 404}
+note: >-
+  Tvarka publishes no AsyncAPI document. The event surface is declared natively in the OpenAPI 3.1
+  webhooks block (one event) and described on the API reference page. Captured here as a webhook
+  catalog rather than fabricated as an AsyncAPI.
+delivery:
+  mode: at-least-once
+  alternative: polling getAuthRequest / getSignRequest
+  subscription: >-
+    Per-request - the provider sets webhookUrl when creating the auth or sign request. An
+    unacceptable URL is rejected at creation with 400 invalid_webhook_url.
+  ack: any 2XX response
+security:
+  signature_header: X-Atk-Signature
+  signature_format: sha256=<HMAC-SHA256(secret, raw-body)>
+  secret_scope: per tenant
+  idempotency_header: X-Atk-Idempotency-Key
+  timestamp_header: true
+  consumer_rules:
+    - Verify the MAC over the raw body before parsing.
+    - Reject stale timestamps.
+    - Deduplicate by the idempotency key.
+events:
+  - name: signStatus
+    operation_id: receiveSignStatus
+    summary: Terminal status and validation-change callback.
+    trigger: >-
+      Sent on terminal status and on every validation.status change.
+    method: POST
+    media_type: application/json
+    payload_schema: '#/components/schemas/SignSignRequestState'
+    payload_source: openapi/tvarka-atk-api-openapi-original.json
+coverage:
+  events: 1
+  signed: true
+  replay_protected: true

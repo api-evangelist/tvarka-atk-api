@@ -1,0 +1,32 @@
+generated: '2026-08-09'
+method: generated
+source: openapi/tvarka-atk-api-openapi-original.json
+note: >-
+  Packaged agent skills for the Tvarka ATK API's marquee flows. Every operationId referenced below
+  was verified against the provider's published OpenAPI 3.1 contract. Tvarka publishes no AGENTS.md
+  or skill files of its own (searched 2026-08-09).
+skills:
+  - file: tvarka-atk-api-authenticate-with-eid.md
+    name: Authenticate a person with a Lithuanian eID card
+    api: openapi/tvarka-atk-api-openapi-original.json
+    operations: [createAuthRequest, submitAuthCertificate, completeAuth, getAuthRequest, cancelAuthRequest, getJwks]
+  - file: tvarka-atk-api-sign-document-qes.md
+    name: Sign a document with a qualified electronic signature
+    api: openapi/tvarka-atk-api-openapi-original.json
+    operations: [createSignRequest, submitSignCertificate, completeSign, getSignRequest, downloadSignedDocument, cancelSignRequest]
+  - file: tvarka-atk-api-remote-sign-smart-id-mobile-id.md
+    name: Authenticate or sign remotely with Smart-ID or Mobile-ID
+    api: openapi/tvarka-atk-api-openapi-original.json
+    operations: [createAuthRequest, createSignRequest, getAuthRequest, getSignRequest, downloadSignedDocument, cancelAuthRequest, cancelSignRequest]
+  - file: tvarka-atk-api-validate-timestamp-archive.md
+    name: Validate, timestamp and archive a signed document
+    api: openapi/tvarka-atk-api-openapi-original.json
+    operations: [validateDocument, timestampDocument, archiveDocument, downloadServiceDocument]
+  - file: tvarka-atk-api-nfc-pairing-handoff.md
+    name: Hand a card ceremony off to a phone over NFC
+    api: openapi/tvarka-atk-api-openapi-original.json
+    operations: [getAuthPairing, getSignPairing, claimPairing, getAuthRequest, getSignRequest]
+  - file: tvarka-atk-api-erase-request-data.md
+    name: Erase request data on demand (GDPR)
+    api: openapi/tvarka-atk-api-openapi-original.json
+    operations: [deleteAuthRequest, deleteSignRequest, bulkErasure]

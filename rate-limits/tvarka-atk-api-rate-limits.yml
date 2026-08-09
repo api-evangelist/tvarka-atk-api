@@ -1,0 +1,36 @@
+generated: '2026-08-09'
+method: derived
+source: openapi/tvarka-atk-api-openapi-original.json
+docs: https://atk.tvarka.pro/docs/lifecycle/
+signal:
+  status: 429
+  error_code: rate_limited
+  retry_header: Retry-After
+  retry_header_unit: seconds
+  applies_to_operations:
+    - createAuthRequest
+    - submitAuthCertificate
+    - completeAuth
+    - getAuthRequest
+    - cancelAuthRequest
+    - claimPairing
+    - createSignRequest
+    - submitSignCertificate
+    - completeSign
+    - getSignRequest
+    - cancelSignRequest
+    - validateDocument
+    - timestampDocument
+    - archiveDocument
+rate_limits: []
+published_quotas: false
+size_limits:
+  - scope: document
+    limit: 15 MiB per provider unless contracted otherwise
+    enforcement: 413 with error code document_too_large
+    source: https://atk.tvarka.pro/docs/lifecycle/
+notes: >-
+  Tvarka documents the rate-limit SIGNAL (429 + Retry-After in seconds + a stable rate_limited error
+  code, declared on every metered operation in the OpenAPI) but publishes no numeric request quota,
+  burst allowance or window. Per-provider throughput is set during onboarding. No quota numbers are
+  recorded here because none are published - this is an observed absence, not a gap in the harvest.

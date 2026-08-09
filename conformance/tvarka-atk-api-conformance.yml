@@ -1,0 +1,155 @@
+generated: '2026-08-09'
+method: searched
+source: https://atk.tvarka.pro/docs/
+sources:
+  - https://atk.tvarka.pro/docs/
+  - https://tvarka.pro/saugumas/
+  - https://tvarka.pro/llms.txt
+  - openapi/tvarka-atk-api-openapi-original.json
+standards:
+  - id: eidas-910-2014
+    name: eIDAS - Regulation (EU) No 910/2014
+    conforms: true
+    evidence: >-
+      "Produktai sukurti pagal Lietuvos teise ir eIDAS reglamenta (ES) Nr. 910/2014" (tvarka.pro
+      llms.txt); the security page states qualified electronic signatures are produced through
+      qualified trust service providers (QTSP) and comply with eIDAS, valid in courts, at the tax
+      authority (VMI) and the Register Centre.
+    source: https://tvarka.pro/saugumas/
+  - id: qes-qualified-electronic-signature
+    name: Qualified Electronic Signature
+    conforms: true
+    evidence: >-
+      The API produces QES; the OpenAPI models a QUALIFIED_VALID validation level and a not_qualified
+      (422) rejection code, and the docs describe a qualified timestamp on signing.
+    source: openapi/tvarka-atk-api-openapi-original.json
+  - id: etsi-pades
+    name: PAdES (ETSI EN 319 142) - PDF Advanced Electronic Signatures
+    conforms: true
+    evidence: >-
+      SignFormat enum value "pades" (signed PDF); the archive service upgrades a PAdES B-T signature
+      to PAdES B-LT (operationId archiveDocument).
+  - id: etsi-xades
+    name: XAdES (ETSI EN 319 132) - XML Advanced Electronic Signatures
+    conforms: true
+    evidence: >-
+      SignFormat describes asice/adoc as XAdES-T containers; the timestamp service adds qualified
+      timestamps to untimestamped XAdES signatures (operationId timestampDocument).
+  - id: etsi-asic-e
+    name: ASiC-E (ETSI EN 319 162) - Associated Signature Containers
+    conforms: true
+    evidence: SignFormat enum value "asice".
+  - id: adoc-v1.0
+    name: ADOC-V1.0 (Lithuanian national signature container)
+    conforms: true
+    evidence: SignFormat enum value "adoc"; provider publishes an ADOC explainer at https://tvarka.pro/irankiai/adoc/.
+  - id: cades
+    name: CAdES - CMS Advanced Electronic Signatures
+    conforms: true
+    evidence: SignFormat "raw" returns a detached CAdES package from a bare hash.
+  - id: qualified-timestamp
+    name: Qualified electronic time stamp (eIDAS Art. 42)
+    conforms: true
+    evidence: >-
+      operationId timestampDocument - "Add qualified timestamps to untimestamped XAdES signatures";
+      signing adds a qualified timestamp. The underlying TSA protocol (RFC 3161) is not named in the
+      published contract, so it is recorded as an eIDAS qualified timestamp rather than an RFC 3161
+      conformance claim.
+  - id: web-eid
+    name: Web eID
+    conforms: true
+    evidence: >-
+      "The desktop reader path uses the same Web-eID transport gateways already speak"
+      (https://atk.tvarka.pro/docs/). The API itself is transport-agnostic - it consumes the
+      certificate and raw card signature the client obtains.
+  - id: rfc7517-jwks
+    name: RFC 7517 - JSON Web Key Set
+    conforms: true
+    evidence: >-
+      GET /.well-known/atk-jwks.json (operationId getJwks) returns a JWKS with an EC P-256 signing
+      key (kid atk-1, alg ES256). Probed 200 on 2026-08-09.
+    source: well-known/tvarka-atk-api-atk-jwks.json
+  - id: rfc7519-jwt
+    name: RFC 7519 - JSON Web Token
+    conforms: true
+    evidence: >-
+      The per-request clientToken is an ES256 JWT; an optional identity assertion JWT is returned and
+      is independently verifiable against the published JWKS.
+  - id: rfc7617-http-basic
+    name: RFC 7617 - HTTP Basic authentication
+    conforms: true
+    evidence: securityScheme basicAuth (type http, scheme basic) is the default document-level security.
+  - id: idempotency-key-header
+    name: draft-ietf-httpapi-idempotency-key-header
+    conforms: true
+    evidence: >-
+      A required Idempotency-Key request header (1-255 characters, scoped to provider + service
+      operation) on validateDocument, timestampDocument and archiveDocument, with a 409
+      idempotency_conflict on payload divergence. Follows the header name and semantics of the IETF
+      draft; the provider does not cite the draft explicitly.
+    source: conventions/tvarka-atk-api-conventions.yml
+  - id: rfc9457-problem-details
+    name: RFC 9457 - Problem Details for HTTP APIs
+    conforms: false
+    evidence: >-
+      Errors use a custom application/json envelope {code, message, requestId, retryable}; no
+      application/problem+json media type appears anywhere in the contract.
+  - id: rfc8594-sunset-header
+    name: RFC 8594 - The Sunset HTTP Header Field
+    conforms: false
+    evidence: >-
+      A prose deprecation policy is published at /docs/lifecycle/ but no Sunset or Deprecation
+      response header is documented or declared in the OpenAPI.
+  - id: oauth2
+    name: OAuth 2.0
+    conforms: false
+    evidence: >-
+      No oauth2 securityScheme; /.well-known/oauth-authorization-server returns 404. Authentication
+      is HTTP Basic (server) plus a provider-minted request-scoped JWT (client).
+  - id: openid-connect
+    name: OpenID Connect
+    conforms: false
+    evidence: >-
+      /.well-known/openid-configuration returns 404. The API authenticates a natural person with a
+      national eID card and returns a verified identity plus an optional assertion JWT, but it is not
+      an OIDC provider - there is no authorization endpoint, no ID token issued to a relying party
+      through an OIDC flow and no discovery document.
+  - id: gdpr
+    name: GDPR - Regulation (EU) 2016/679
+    conforms: true
+    evidence: >-
+      Dedicated erasure operations (deleteAuthRequest, deleteSignRequest, bulkErasure, all tagged
+      "Erasure"), a published 30-day default retention window with a named purge scope, EU-only data
+      residency, and a published privacy policy naming the joint controllers.
+    source: https://tvarka.pro/privatumas/
+  - id: openapi-3.1
+    name: OpenAPI 3.1.0
+    conforms: true
+    evidence: >-
+      https://atk.tvarka.pro/openapi.json served as application/vnd.oai.openapi+json;version=3.1,
+      plus two specialist contracts (auth.yaml, sign.yaml) declared in x-publication.
+  - id: apis-json
+    name: APIs.json 0.19
+    conforms: true
+    evidence: >-
+      The provider serves its own APIs.json/APIs.yaml developer catalog at
+      https://atk.tvarka.pro/apis.json (aid tvarka.pro:atk-api-catalog), with typed properties.
+  - id: llms-txt
+    name: llms.txt
+    conforms: true
+    evidence: >-
+      https://tvarka.pro/llms.txt returns 200 text/plain in valid llms.txt shape. Note the API host
+      (atk.tvarka.pro) does NOT serve one - /llms.txt and /docs/llms.txt both 404.
+  - id: a2a-agent-card
+    name: A2A Agent Card
+    conforms: false
+    evidence: >-
+      /.well-known/agent-card.json and /.well-known/agent.json both 404 on atk.tvarka.pro,
+      tvarka.pro and sign.tvarka.pro (probed 2026-08-09).
+certifications_published: false
+certification_note: >-
+  No SOC 2, ISO 27001, PCI DSS, HIPAA or FedRAMP certification is claimed anywhere on the public
+  surface. The published compliance posture is regulatory rather than certification-based - eIDAS
+  conformance through qualified trust service providers, GDPR, and EU-only data residency, stated at
+  https://tvarka.pro/saugumas/.
+compliance_page: https://tvarka.pro/saugumas/

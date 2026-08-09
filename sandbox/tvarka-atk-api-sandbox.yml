@@ -1,0 +1,70 @@
+generated: '2026-08-09'
+method: searched
+source: https://atk.tvarka.pro/docs/test-data/
+docs:
+  - https://atk.tvarka.pro/docs/test-data/
+  - https://atk.tvarka.pro/docs/access/
+  - https://atk.tvarka.pro/docs/try/
+model: same-host-environment-flag
+separation:
+  note: >-
+    Production and sandbox run on the SAME host and base URL (https://atk.tvarka.pro/v1). There is
+    no separate sandbox hostname and no test-key prefix. Separation is a property of the issued
+    provider credential: credentials issued with environment=sandbox get the identical API against
+    test-card material and are never billed. This is stated verbatim in the OpenAPI servers[]
+    description.
+  environment_flag: environment=sandbox (set on the provider credential, not sent per request)
+  billing: sandbox operations are zero-rated
+  content_policy: >-
+    Synthetic/test data only. The docs warn explicitly - never upload real documents, personal data
+    or other sensitive content with sandbox credentials.
+access:
+  request_url: https://atk.tvarka.pro/docs/access/
+  process: >-
+    Self-serve form (organization, contact, app origin, what you are building). Sandbox access is
+    issued after a short manual review; the credential-claim link is emailed but the secret itself
+    is never emailed. Production access is set up directly with the provider.
+  credential_form: keyId + keySecret (HTTP Basic), plus a provider server IP allow-list
+console:
+  url: https://atk.tvarka.pro/docs/try/
+  kind: Swagger UI 5.32.11 same-origin try-it console
+  note: >-
+    Authorization stays in the browser tab only and every request is restricted to the ATK origin
+    under /v1/. The console warns that production operations can be billable and can start a real
+    authentication or signature ceremony.
+test_material:
+  - kind: document
+    name: atk-test.pdf
+    url: https://atk.tvarka.pro/docs/test-data/
+    description: >-
+      Small deterministic PDF for signing, validation, timestamp and archive calls.
+    sha256: b0966e87751a6443f9e6894b3ccb91afdf784343ca0845fec20194e4d44b638f
+    digest_note: >-
+      The provider publishes the digest as a downloadable file so automation can verify it is using
+      the published bytes.
+  - kind: card
+    name: ATK test card bundle
+    availability: provisioned
+    description: >-
+      Approved signing sandboxes receive a provider-scoped test-card bundle and instructions
+      separately. It exercises the real certificate, challenge, signature, trust and completion
+      paths without card hardware. The private test key is NOT a global public credential. A real
+      Lithuanian eID card can also be used against an appropriately provisioned sandbox.
+  - kind: remote-identity
+    name: Smart-ID / Mobile-ID test identities
+    availability: provisioned
+    description: >-
+      Remote-method test identities depend on the environment enabled for the contract and are
+      supplied with the sandbox credential packet so values and expected outcomes match that
+      environment. The docs state explicitly that production identities must not be reused as test
+      fixtures.
+published_test_values:
+  note: >-
+    The only globally published test value is atk-test.pdf and its SHA-256 digest. Every credential,
+    test card and remote test identity is issued per provider, so no magic identifiers, test key
+    prefixes or fixed test personal codes exist to record. The personalCode 39001010000 and
+    phoneNumber +37061234567 that appear in the OpenAPI are schema EXAMPLES, not working sandbox
+    fixtures - do not treat them as test credentials.
+time_simulation:
+  supported: false
+  note: No test clocks or time-simulation tooling are published.

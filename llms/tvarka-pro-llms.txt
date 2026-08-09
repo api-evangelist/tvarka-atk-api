@@ -1,0 +1,46 @@
+# Tvarka
+
+> Tvarka – operacinė sistema Lietuvos juridiniams asmenims: kvalifikuoti
+> el. parašai (QES), automatizuota buhalterija ir verslo partnerių patikra
+> (due diligence). Viena eID paskyra, Vadovo valdoma prieiga, kainodara
+> pagal realų naudojimą.
+
+Tvarka.pro yra jungtinis Advokato M. Kiškio kontoros INVENT ir
+Socialiniai algoritmai, UAB projektas. Produktai sukurti pagal Lietuvos
+teisę ir eIDAS reglamentą (ES) Nr. 910/2014; duomenys saugomi Europos
+Sąjungoje.
+
+## Produktai
+- [Tvarka Sign](https://tvarka.pro/sign/): kvalifikuotas el. parašas (QES) – rekomenduojama asmens tapatybės kortele su bekontakčiu NFC pasirašymu be skaitytuvo (30–40 % pigiau nei Smart-ID ar Mobile-ID); taip pat Smart-ID, Mobile-ID ir USB/eID.
+- [Tvarka Buhalterija](https://tvarka.pro/produktai/buhalterija/): automatizuota buhalterija Vadovo valdomai MB ar UAB – sąskaitų nuskaitymas, periodų uždarymas, VMI ir Sodra deklaracijų parengimas.
+- [Due diligence](https://tvarka.pro/produktai/due-diligence/): konfidenciali verslo partnerių, tiekėjų ir klientų rizikų patikra.
+
+## Kainodara
+- [Kainodara](https://tvarka.pro/kainodara/): kiek naudojate, tiek ir mokate, jokių prenumeratų. Kvalifikuotas pasirašymas nuo 0,29 EUR + PVM, nepavykęs pasirašymas nemokamas.
+- [Nemokamas asmeninis planas](https://tvarka.pro/kainodara/): 10 kvalifikuotų el. parašų (QES) per kalendorinį mėnesį nemokamai – PDF pasirašymas Lietuvos asmens tapatybės kortele per NFC Tvarka Sign Android programėlėje, be paskyros, asmeniniam naudojimui.
+
+## Įrankiai ir formatai
+- [ADOC formatas](https://tvarka.pro/irankiai/adoc/): kas yra ADOC-V1.0, kaip atidaryti ir pasirašyti .adoc dokumentą.
+- [ASiC-E formatas](https://tvarka.pro/irankiai/asice/): ASiC-E konteinerio paaiškinimas ir pasirašymas.
+- [Sujungti PDF](https://tvarka.pro/irankiai/sujungti-pdf/): kelių PDF sujungimas į vieną failą.
+- [PDF/A](https://tvarka.pro/irankiai/pdf-a/): ilgalaikio saugojimo PDF/A formatas.
+
+## Palyginimai
+- [Dokobit alternatyva](https://tvarka.pro/palyginimas/dokobit-alternatyva/): Tvarka Sign ir Dokobit palyginimas.
+- [Mark Sign alternatyva](https://tvarka.pro/palyginimas/mark-sign-alternatyva/): Tvarka Sign ir Mark Sign palyginimas.
+- [GoSign alternatyva](https://tvarka.pro/palyginimas/gosign-alternatyva/): Tvarka Sign ir GoSign palyginimas.
+
+## Pagalba
+- [Atsisiuntimai](https://tvarka.pro/atsisiuntimai/): visi šiuo metu platinami Tvarka Windows, macOS, Android ir iPhone programų leidimai bei tikroji jų platinimo būsena.
+- [Gidai](https://tvarka.pro/gidai/): lietuviški informaciniai gidai apie QES, ADOC, ASiC-E, PDF/A, Buhalteriją, Due diligence ir registrų užduotis.
+- [DUK](https://tvarka.pro/duk/): dažniausiai užduodami klausimai.
+- [Pagalbos centras](https://tvarka.pro/pagalba/): gidai ir instrukcijos.
+- [Pirmasis pasirašymas](https://tvarka.pro/pagalba/tvarka-sign-pirmasis-pasirasymas/): Tvarka Sign pradžios gidas.
+- [Tvarka Sign vadovas](https://tvarka.pro/pagalba/tvarka-sign-vadovas/): išsamus vartotojo vadovas.
+- [Saugumas](https://tvarka.pro/saugumas/): duomenų apsauga ir eIDAS atitiktis.
+
+## Įmonė
+- [Apie mus](https://tvarka.pro/apie-mus/): platformos operatoriai ir komanda.
+- [Kontaktai](https://tvarka.pro/kontaktai/): kontaktinė informacija.
+- [Paslaugų sąlygos](https://tvarka.pro/salygos/)
+- [Privatumo politika](https://tvarka.pro/privatumas/)

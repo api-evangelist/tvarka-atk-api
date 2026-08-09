@@ -1,0 +1,87 @@
+generated: '2026-08-09'
+method: searched
+source: https://atk.tvarka.pro/docs/quickstart/ + openapi/tvarka-atk-api-openapi-original.json
+summary:
+  types:
+  - http
+  - apiKey
+  http_schemes:
+  - basic
+  - bearer
+  api_key_in:
+  - query
+  oauth2_flows: []
+  oauth2: false
+  openid_connect: false
+  model: layered - a long-lived provider secret on the backend, a short-lived request-scoped token on
+    the device
+schemes:
+- name: basicAuth
+  type: http
+  scheme: basic
+  description: 'Provider server-to-server credentials `keyId:keySecret`. Server-to-server only, also gated
+    by the
+
+    provider''s server IP allow-list. Never placed in a browser/mobile client.'
+  sources:
+  - openapi/tvarka-atk-api-auth-openapi.yaml
+  - openapi/tvarka-atk-api-openapi-original.json
+  - openapi/tvarka-atk-api-sign-openapi.yaml
+- name: clientToken
+  type: http
+  scheme: bearer
+  bearerFormat: JWT
+  description: 'Short-lived, per-request JWT (`ES256`) minted at request creation, scoped
+
+    `{tenant, requestId, purpose, method, allowedOrigins}`. Safe to hand to a browser/mobile client:
+
+    it cannot create requests, read tenant data, or touch other requests. For browser clients the API
+
+    enforces `Origin` against `allowedOrigins` (rejects cross-origin replay).'
+  sources:
+  - openapi/tvarka-atk-api-auth-openapi.yaml
+  - openapi/tvarka-atk-api-openapi-original.json
+  - openapi/tvarka-atk-api-sign-openapi.yaml
+- name: downloadToken
+  type: apiKey
+  in: query
+  parameter: downloadToken
+  description: One-off token returned with a completed sign result, for fetching the signed document.
+  sources:
+  - openapi/tvarka-atk-api-openapi-original.json
+  - openapi/tvarka-atk-api-sign-openapi.yaml
+docs: https://atk.tvarka.pro/docs/quickstart/
+model:
+  server_to_server: HTTP Basic keyId:keySecret, additionally gated by the provider server IP allow-list.
+    Document-level default security. Creates requests, polls, cancels, erases, downloads and calls the
+    trust services. Never placed in a browser or mobile client.
+  client: A per-request ES256 JWT (clientToken) minted at request creation and scoped {tenant, requestId,
+    purpose, method, allowedOrigins}. It cannot create requests, read tenant data or touch another request.
+    For browser clients the API enforces Origin against allowedOrigins and rejects cross-origin replay.
+  download: A one-off downloadToken query parameter returned with a completed result.
+  operation_token: 'Not a securityScheme, but a second single-use factor inside the ceremony: the operationToken
+    returned with the data-to-be-signed must be presented on complete, and is spent on first use (409
+    operation_token_spent).'
+  unauthenticated: 'claimPairing (POST /pairing/claim) declares security: [] - possession of the short-lived
+    one-claim pairing token is the credential. getJwks is also public.'
+credential_issuance:
+  url: https://atk.tvarka.pro/docs/access/
+  process: Manual review; the credential-claim link is emailed but the secret itself is never emailed.
+  environments:
+  - sandbox
+  - production
+  note: The environment is a property of the issued credential, not a separate host or key prefix.
+failure_codes:
+- invalid_basic_credentials (401)
+- invalid_client_token (401)
+- client_token_expired (401)
+- operation_token_expired (401)
+- invalid_download_token (401)
+- origin_not_allowed (403)
+- ip_not_allowed (403)
+- tenant_suspended (403)
+- tier_forbidden (403)
+- operation_token_spent (409)
+verification:
+  jwks: well-known/tvarka-atk-api-atk-jwks.json
+  note: The optional identity assertion JWT is verifiable against the published JWKS (kid atk-1, ES256).

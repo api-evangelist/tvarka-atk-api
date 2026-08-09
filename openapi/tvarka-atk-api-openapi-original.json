@@ -1,0 +1,3187 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Tvarka ATK API",
+    "version": "1.3.0",
+    "summary": "Lithuanian eID authentication, qualified signing, validation and LTV services.",
+    "description": "The canonical ATK API contract. ATK physical-reader and NFC ceremonies are the primary authentication and signing methods. Smart-ID and Mobile-ID are optional server-side methods under the same request, polling, webhook and metering model. Start with the [five-minute quickstart](https://atk.tvarka.pro/docs/quickstart/) or use the specialist [authentication](https://atk.tvarka.pro/docs/auth/) and [signing](https://atk.tvarka.pro/docs/sign/) references.",
+    "termsOfService": "https://atk.tvarka.pro/docs/lifecycle/",
+    "contact": {
+      "name": "Tvarka API team",
+      "url": "https://atk.tvarka.pro/docs/access/",
+      "email": "info@tvarka.pro"
+    },
+    "license": {
+      "name": "Proprietary",
+      "url": "https://tvarka.pro/salygos/"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://atk.tvarka.pro/v1",
+      "description": "Production. Sandbox runs on the same host - provider credentials issued with\nenvironment=sandbox get the identical API against test-card material and are never billed.\n"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "The eID authentication ceremony (`/v1/auth/*`)."
+    },
+    {
+      "name": "Pairing",
+      "description": "NFC remote pairing - complete a request by tapping a card on a different device."
+    },
+    {
+      "name": "Well-known",
+      "description": "Keys for verifying the optional `assertion` JWT."
+    },
+    {
+      "name": "Sign",
+      "description": "The QES signing ceremony (`/v1/sign/*`)."
+    },
+    {
+      "name": "Validation",
+      "description": "Standalone advisory validation of signed artifacts."
+    },
+    {
+      "name": "LTV",
+      "description": "Post-signature timestamp and long-term-validation upgrades."
+    }
+  ],
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ],
+  "paths": {
+    "/auth/requests": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "createAuthRequest",
+        "summary": "Create an authentication request (server-to-server)",
+        "description": "Called by the provider's backend with HTTP Basic (`keyId:keySecret`). `audience` must be an\nexact origin on the provider's allow-list. Physical requests return a short-lived `clientToken`;\nNFC requests return a pairing hint; Smart-ID/Mobile-ID requests remain entirely server-side.\n",
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "label": "Smart-ID",
+            "source": "curl -u \"$ATK_KEY_ID:$ATK_KEY_SECRET\" https://atk.tvarka.pro/v1/auth/requests \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"audience\":\"https://app.example\",\"method\":\"smart_id\",\"personalCode\":\"39001010000\"}'\n"
+          },
+          {
+            "lang": "curl",
+            "label": "Mobile-ID",
+            "source": "curl -u \"$ATK_KEY_ID:$ATK_KEY_SECRET\" https://atk.tvarka.pro/v1/auth/requests \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"audience\":\"https://app.example\",\"method\":\"mobile_id\",\"personalCode\":\"39001010000\",\"phoneNumber\":\"+37061234567\"}'\n"
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthAuthRequestCreate"
+              },
+              "examples": {
+                "physicalAtk": {
+                  "summary": "Primary ATK desktop-reader method",
+                  "value": {
+                    "audience": "https://app.example",
+                    "method": "physical"
+                  }
+                },
+                "smartId": {
+                  "summary": "Optional Smart-ID method",
+                  "value": {
+                    "audience": "https://app.example",
+                    "method": "smart_id",
+                    "personalCode": "39001010000"
+                  }
+                },
+                "mobileId": {
+                  "summary": "Optional Mobile-ID method",
+                  "value": {
+                    "audience": "https://app.example",
+                    "method": "mobile_id",
+                    "personalCode": "39001010000",
+                    "phoneNumber": "+37061234567"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Request created; awaiting the ATK client or remote user authorization.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthAuthRequestCreated"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/AuthBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AuthForbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/AuthRateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/AuthServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/auth/{requestId}/certificate": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "submitAuthCertificate",
+        "summary": "Submit the card's authentication certificate; receive the DTBS + challenge",
+        "description": "Called by the client with `Authorization: Bearer <clientToken>`. The API validates the\ncertificate (chain, revocation, purpose = authentication, key usage), builds the canonical\nchallenge, and returns the exact `dtbs` the card must sign plus a single-use `operationToken`.\nPhysical/NFC only; server-side methods do not call this endpoint.\n",
+        "security": [
+          {
+            "clientToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthRequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthCertificateSubmit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "DTBS + challenge + operation token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthCertificateChallenge"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AuthForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AuthNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/AuthConflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/AuthUnprocessable"
+          }
+        }
+      }
+    },
+    "/auth/{requestId}/complete": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "completeAuth",
+        "summary": "Submit the raw card signature; receive the verified identity",
+        "description": "Called by the client with `Authorization: Bearer <clientToken>` and the single-use\n`operationToken` in the body. The API verifies the signature against the stored `dtbs` and the\ncertificate's public key, enforces the identity-swap guard, and returns the verified identity\n(and the optional `assertion` JWT). Retry-safe: a repeat with the same tuple returns the same\nresult; a different signature/cert after the token is claimed is rejected.\nPhysical/NFC only; server-side methods complete asynchronously.\n",
+        "security": [
+          {
+            "clientToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthRequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthCompleteSubmit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authenticated - verified identity.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthAuthResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/AuthForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/AuthNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/AuthConflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/AuthUnprocessable"
+          }
+        }
+      }
+    },
+    "/auth/{requestId}": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "getAuthRequest",
+        "summary": "Poll request status / fetch the result",
+        "description": "Readable with the provider's Basic credentials for every method, or with the request's\n`clientToken` for physical/NFC requests. Smart-ID/Mobile-ID providers poll this endpoint or\nconsume the terminal webhook.\n",
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "clientToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthRequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthAuthRequestState"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthUnauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/AuthNotFound"
+          }
+        }
+      }
+    },
+    "/auth/{requestId}/cancel": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "cancelAuthRequest",
+        "summary": "Cancel a non-terminal request",
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "clientToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthRequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthAuthRequestState"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/AuthNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/AuthConflict"
+          }
+        }
+      }
+    },
+    "/auth/{requestId}/delete": {
+      "post": {
+        "tags": [
+          "Erasure"
+        ],
+        "operationId": "deleteAuthRequest",
+        "summary": "Erase one request on demand (GDPR)",
+        "description": "Basic only, scoped to the caller's own provider. A non-terminal request is cancelled first,\nthen its document/result bytes + derived personal data are purged (exactly what the retention\njob strips); a de-identified audit row remains. Idempotent.\n",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthRequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erased.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "deleted": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/AuthNotFound"
+          }
+        }
+      }
+    },
+    "/erasure": {
+      "post": {
+        "tags": [
+          "Erasure"
+        ],
+        "operationId": "bulkErasure",
+        "summary": "Bulk-erase the provider's terminal requests (GDPR)",
+        "description": "Basic only. Purges document/result bytes + derived personal data of every TERMINAL,\nnot-yet-purged request of the calling provider (auth and sign alike); optional `before`\n(ISO-8601) restricts to requests last updated before that moment. In-flight requests are\nleft untouched - erase them individually if intended.\n",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "before": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Erasure summary.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "purged": {
+                      "type": "integer"
+                    },
+                    "failed": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/AuthBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/AuthUnauthorized"
+          },
+          "503": {
+            "$ref": "#/components/responses/AuthServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/auth/{requestId}/pairing": {
+      "get": {
+        "tags": [
+          "Pairing"
+        ],
+        "operationId": "getAuthPairing",
+        "summary": "Get a pairing token/QR to complete this request on a phone",
+        "description": "Only for `method:\"nfc\"`. Basic only - the integrator's server rotates the one-time token.\nReturns a high-entropy, short-lived, one-claim pairing token and a deep link / QR the phone\nscans. The phone then calls `/pairing/claim`, receives the request's `clientToken`, and\ndrives the same `/certificate` + `/complete` endpoints.\n",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/AuthRequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pairing payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthPairingInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/AuthNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/AuthConflict"
+          }
+        }
+      }
+    },
+    "/pairing/claim": {
+      "post": {
+        "tags": [
+          "Pairing"
+        ],
+        "operationId": "claimPairing",
+        "summary": "Claim a pairing token from the tapping phone",
+        "description": "No Basic auth - authorized solely by the high-entropy `pairingToken`. One-claim, rate-limited,\nstored hashed. Returns the request's `clientToken` and a minimal `summary` (purpose + label\nonly, never document contents).\n",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthPairingClaimRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Claimed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthPairingClaimResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/AuthNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/AuthConflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/AuthRateLimited"
+          }
+        }
+      }
+    },
+    "/.well-known/atk-jwks.json": {
+      "servers": [
+        {
+          "url": "https://atk.tvarka.pro",
+          "description": "Host root - the JWKS lives outside the /v1 base path."
+        }
+      ],
+      "get": {
+        "tags": [
+          "Well-known"
+        ],
+        "operationId": "getJwks",
+        "summary": "JWKS for verifying the optional `assertion` JWT",
+        "description": "Public keys (by `kid`) for the ES256 signer. Rotation keeps current + previous keys published so\nin-flight assertions verify.\n",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Key set.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthJwks"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/AuthNotFound"
+          }
+        }
+      }
+    },
+    "/sign/requests": {
+      "post": {
+        "tags": [
+          "Sign"
+        ],
+        "operationId": "createSignRequest",
+        "summary": "Create a signing request (server-to-server)",
+        "description": "HTTP Basic. Provide the document one of three ways - inline `document` (base64), an allow-listed\n`documentRef`, or a bare `hash` (only for `format:\"raw\"`). Container formats\n(pades/asice/adoc) require exactly one of `document` or `documentRef`. PAdES accepts an unsigned\nor already-signed PDF; ASiC-E/ADOC accept either a PDF (Tvarka constructs a new single-payload\ncontainer) or an existing valid container, which is treated as an opaque whole and receives one\nadditional signature without payload or attachment edits. Physical requests return a client\ntoken, NFC returns a pairing hint, and Smart-ID/Mobile-ID return a user verification code.\nRemote methods are PAdES-only and stay server-side.\n",
+        "x-codeSamples": [
+          {
+            "lang": "curl",
+            "label": "Smart-ID PAdES",
+            "source": "curl -u \"$ATK_KEY_ID:$ATK_KEY_SECRET\" https://atk.tvarka.pro/v1/sign/requests \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"format\":\"pades\",\"method\":\"smart_id\",\"personalCode\":\"39001010000\",\"document\":\"<base64-pdf>\"}'\n"
+          },
+          {
+            "lang": "curl",
+            "label": "Mobile-ID PAdES",
+            "source": "curl -u \"$ATK_KEY_ID:$ATK_KEY_SECRET\" https://atk.tvarka.pro/v1/sign/requests \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"format\":\"pades\",\"method\":\"mobile_id\",\"personalCode\":\"39001010000\",\"phoneNumber\":\"+37061234567\",\"document\":\"<base64-pdf>\"}'\n"
+          }
+        ],
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignSignRequestCreate"
+              },
+              "examples": {
+                "physicalAtk": {
+                  "summary": "Primary ATK PAdES method",
+                  "value": {
+                    "format": "pades",
+                    "method": "physical",
+                    "document": "JVBERi0xLjQK"
+                  }
+                },
+                "smartId": {
+                  "summary": "Optional Smart-ID PAdES method",
+                  "value": {
+                    "format": "pades",
+                    "method": "smart_id",
+                    "personalCode": "39001010000",
+                    "document": "JVBERi0xLjQK"
+                  }
+                },
+                "mobileId": {
+                  "summary": "Optional Mobile-ID PAdES method",
+                  "value": {
+                    "format": "pades",
+                    "method": "mobile_id",
+                    "personalCode": "39001010000",
+                    "phoneNumber": "+37061234567",
+                    "document": "JVBERi0xLjQK"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Request created; awaiting the ATK client or remote user authorization.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignSignRequestCreated"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/SignBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SignUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SignForbidden"
+          },
+          "413": {
+            "$ref": "#/components/responses/SignTooLarge"
+          },
+          "429": {
+            "$ref": "#/components/responses/SignRateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/SignServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/sign/{requestId}/certificate": {
+      "post": {
+        "tags": [
+          "Sign"
+        ],
+        "operationId": "submitSignCertificate",
+        "summary": "Submit the card's signing certificate; receive the DTBS",
+        "description": "Bearer clientToken. The API validates the certificate (chain, revocation, purpose =\nsigning/content-commitment, qualified/QSCD evidence), prepares the format-specific DTBS (for\nPAdES - the SHA-256 CAdES SignedAttributes digest; SHA-256 for both key curves), and returns\nit + `operationToken`. Physical/NFC only.\n",
+        "security": [
+          {
+            "clientToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SignRequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignSignCertificateSubmit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "DTBS + operation token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignSignCertificateChallenge"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/SignUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SignForbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/SignNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/SignConflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/SignUnprocessable"
+          }
+        }
+      }
+    },
+    "/sign/{requestId}/complete": {
+      "post": {
+        "tags": [
+          "Sign"
+        ],
+        "operationId": "completeSign",
+        "summary": "Submit the raw card signature; assemble the container",
+        "description": "Bearer clientToken + single-use `operationToken`. Synchronous: the API verifies the signature\nagainst the stored DTBS + cert, assembles + timestamps the AdES container inline, schedules\nasync validation, and returns `200 done` with `validation:{status:\"pending\"}` (or\n`notApplicable` in sandbox/raw, or the internal ADOC verdict). `finalizing` is observable via\nGET only if a crash wedges the request until the reaper releases it. Retry-safe; a transient\nassembly failure returns a retryable 5xx with the operation released; one `atk.sign` charge\nat `done`. Physical/NFC only; remote methods complete asynchronously.\n",
+        "security": [
+          {
+            "clientToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SignRequestId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignSignCompleteSubmit"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Done - container assembled + signature verified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignSignResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/SignUnauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/SignNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/SignConflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/SignUnprocessable"
+          }
+        }
+      }
+    },
+    "/sign/{requestId}": {
+      "get": {
+        "tags": [
+          "Sign"
+        ],
+        "operationId": "getSignRequest",
+        "summary": "Poll status + validation axis; fetch the result",
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "clientToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SignRequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignSignRequestState"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/SignUnauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/SignNotFound"
+          }
+        }
+      }
+    },
+    "/sign/{requestId}/document": {
+      "get": {
+        "tags": [
+          "Sign"
+        ],
+        "operationId": "downloadSignedDocument",
+        "summary": "Download the signed container",
+        "description": "Authorized by the provider's Basic credentials or a `downloadToken` query param.",
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "downloadToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SignRequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The signed container bytes.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/SignUnauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/SignNotFound"
+          }
+        }
+      }
+    },
+    "/sign/{requestId}/cancel": {
+      "post": {
+        "tags": [
+          "Sign"
+        ],
+        "operationId": "cancelSignRequest",
+        "summary": "Cancel a non-terminal request",
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "clientToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SignRequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignSignRequestState"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/SignNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/SignConflict"
+          }
+        }
+      }
+    },
+    "/sign/{requestId}/delete": {
+      "post": {
+        "tags": [
+          "Erasure"
+        ],
+        "operationId": "deleteSignRequest",
+        "summary": "Erase one request on demand (GDPR)",
+        "description": "Basic only, scoped to the caller's own provider. A non-terminal request is cancelled first,\nthen its document/container bytes + derived personal data are purged (exactly what the\nretention job strips); a de-identified audit row remains. Idempotent. Bulk erasure lives on\nthe base API (`POST /v1/erasure`) and covers sign requests too.\n",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SignRequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Erased.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "requestId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "deleted": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/SignNotFound"
+          }
+        }
+      }
+    },
+    "/sign/{requestId}/pairing": {
+      "get": {
+        "tags": [
+          "Sign"
+        ],
+        "operationId": "getSignPairing",
+        "summary": "Rotate and return the NFC pairing token for a sign request",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SignRequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Newly rotated pairing token and links.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignPairingInfo"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/SignNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/SignConflict"
+          }
+        }
+      }
+    },
+    "/validation": {
+      "post": {
+        "tags": [
+          "Validation"
+        ],
+        "operationId": "validateDocument",
+        "summary": "Validate an existing signed document or container",
+        "description": "Paid-tier, Basic-authenticated synchronous service. SiVa backs PAdES/ASiC-E and can return\n`passed`/`failed`. ADOC runs Tvarka's internal STRUCTURAL inspector, which performs no\ncryptographic verification and therefore never returns `passed` - a structurally sound ADOC\nyields `status: structural`. The verdict is advisory, not a regulatory conclusion. A\nsuccessful service call emits exactly one `atk.validate` event. `Idempotency-Key` makes network\nretries replay the original response without a second event.\n",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SignIdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignValidationServiceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Advisory validation result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignValidationServiceResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/SignBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SignUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SignForbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/SignConflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/SignTooLarge"
+          },
+          "429": {
+            "$ref": "#/components/responses/SignRateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/SignServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/timestamp": {
+      "post": {
+        "tags": [
+          "LTV"
+        ],
+        "operationId": "timestampDocument",
+        "summary": "Add qualified timestamps to untimestamped XAdES signatures",
+        "description": "Paid-tier, Basic-authenticated synchronous service for ASiC-E and ADOC. Every XAdES signature\nwithout SignatureTimeStamp receives an RFC 3161 token; existing timestamps are preserved. Emits\nexactly one `atk.timestamp` event and returns a one-off output download token.\n",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SignIdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignTimestampServiceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Timestamped container is ready.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignLtvServiceResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/SignBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SignUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SignForbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/SignConflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/SignTooLarge"
+          },
+          "429": {
+            "$ref": "#/components/responses/SignRateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/SignServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/archive": {
+      "post": {
+        "tags": [
+          "LTV"
+        ],
+        "operationId": "archiveDocument",
+        "summary": "Upgrade a PAdES B-T signature to PAdES B-LT",
+        "description": "Paid-tier, Basic-authenticated synchronous service. Fresh signer and TSA revocation evidence is\ncollected and embedded as DSS/VRI; the OCSP freshness hard rule applies. Already-valid B-LT is\nreturned unchanged. Emits exactly one `atk.archive` event and returns a one-off download token.\n",
+        "security": [
+          {
+            "basicAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SignIdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignArchiveServiceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "PAdES B-LT document is ready.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignLtvServiceResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/SignBadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/SignUnauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/SignForbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/SignConflict"
+          },
+          "413": {
+            "$ref": "#/components/responses/SignTooLarge"
+          },
+          "429": {
+            "$ref": "#/components/responses/SignRateLimited"
+          },
+          "503": {
+            "$ref": "#/components/responses/SignServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/services/{requestId}/document": {
+      "get": {
+        "tags": [
+          "LTV"
+        ],
+        "operationId": "downloadServiceDocument",
+        "summary": "Download timestamp/archive output",
+        "security": [
+          {
+            "basicAuth": []
+          },
+          {
+            "downloadToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SignRequestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transformed artifact bytes.",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/SignUnauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/SignNotFound"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "basicAuth": {
+        "type": "http",
+        "scheme": "basic",
+        "description": "Provider server-to-server credentials `keyId:keySecret`. Server-to-server only, also gated by the\nprovider's server IP allow-list. Never placed in a browser/mobile client.\n"
+      },
+      "clientToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Short-lived, per-request JWT (`ES256`) minted at request creation, scoped\n`{tenant, requestId, purpose, method, allowedOrigins}`. Safe to hand to a browser/mobile client:\nit cannot create requests, read tenant data, or touch other requests. For browser clients the API\nenforces `Origin` against `allowedOrigins` (rejects cross-origin replay).\n"
+      },
+      "downloadToken": {
+        "type": "apiKey",
+        "in": "query",
+        "name": "downloadToken",
+        "description": "One-off token returned with a completed sign result, for fetching the signed document."
+      }
+    },
+    "parameters": {
+      "AuthRequestId": {
+        "name": "requestId",
+        "in": "path",
+        "required": true,
+        "description": "The `requestId` returned by `POST /auth/requests`.",
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "SignRequestId": {
+        "name": "requestId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "SignIdempotencyKey": {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": true,
+        "description": "1-255 visible characters; scoped to provider + service operation.",
+        "schema": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        }
+      }
+    },
+    "schemas": {
+      "AuthMethod": {
+        "type": "string",
+        "enum": [
+          "physical",
+          "nfc",
+          "smart_id",
+          "mobile_id"
+        ],
+        "example": "physical",
+        "description": "physical = desktop reader; nfc = phone tap; smart_id/mobile_id = server-side remote eID."
+      },
+      "AuthStatus": {
+        "type": "string",
+        "description": "Flat request status. Non-terminal - `pending`, `awaitingCard`, `awaitingCredentials`,\n`finalizing`. Terminal success - `done`. Terminal failure -\n`cancelled`/`timeout`/`deviceError`/`pinBlocked`/`cardRemoved`/`certInvalid`.\n`awaitingCredentials` is SDK-reported (CAN/PIN entry is out-of-band).\n",
+        "enum": [
+          "pending",
+          "awaitingCard",
+          "awaitingCredentials",
+          "finalizing",
+          "done",
+          "cancelled",
+          "timeout",
+          "deviceError",
+          "pinBlocked",
+          "cardRemoved",
+          "certInvalid"
+        ]
+      },
+      "AuthHashAlgOid": {
+        "type": "string",
+        "description": "Digest algorithm OID, curve-matched. SHA-256 = 2.16.840.1.101.3.4.2.1; SHA-384 = 2.16.840.1.101.3.4.2.2.",
+        "enum": [
+          "2.16.840.1.101.3.4.2.1",
+          "2.16.840.1.101.3.4.2.2"
+        ]
+      },
+      "AuthSignatureAlgorithm": {
+        "type": "string",
+        "description": "Card-reported JWS-style algorithm.",
+        "enum": [
+          "ES256",
+          "ES384"
+        ]
+      },
+      "AuthSignatureEncoding": {
+        "type": "string",
+        "enum": [
+          "P1363",
+          "DER"
+        ],
+        "default": "P1363",
+        "description": "Raw ECDSA signature encoding. P1363 = fixed-width r||s; DER = SEQUENCE(r, s). Informational - the server auto-detects and accepts either encoding regardless of this field."
+      },
+      "AuthCertSubject": {
+        "type": "object",
+        "description": "Selected subject fields from the certificate. `serialNumber` holds `PNOLT-<personal code>`.",
+        "properties": {
+          "serialNumber": {
+            "type": "string",
+            "example": "PNOLT-39001010000"
+          },
+          "givenName": {
+            "type": "string"
+          },
+          "sn": {
+            "type": "string",
+            "description": "Surname."
+          },
+          "cn": {
+            "type": "string"
+          },
+          "c": {
+            "type": "string",
+            "example": "LT"
+          }
+        }
+      },
+      "AuthAuthRequestCreate": {
+        "type": "object",
+        "required": [
+          "audience",
+          "method"
+        ],
+        "additionalProperties": false,
+        "oneOf": [
+          {
+            "title": "Physical ATK",
+            "properties": {
+              "method": {
+                "const": "physical"
+              }
+            },
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "personalCode"
+                  ],
+                  "properties": {
+                    "personalCode": {}
+                  }
+                },
+                {
+                  "required": [
+                    "phoneNumber"
+                  ],
+                  "properties": {
+                    "phoneNumber": {}
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "title": "ATK over NFC",
+            "properties": {
+              "method": {
+                "const": "nfc"
+              }
+            },
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "personalCode"
+                  ],
+                  "properties": {
+                    "personalCode": {}
+                  }
+                },
+                {
+                  "required": [
+                    "phoneNumber"
+                  ],
+                  "properties": {
+                    "phoneNumber": {}
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "title": "Smart-ID",
+            "required": [
+              "personalCode"
+            ],
+            "properties": {
+              "method": {
+                "const": "smart_id"
+              }
+            },
+            "not": {
+              "required": [
+                "phoneNumber"
+              ],
+              "properties": {
+                "phoneNumber": {}
+              }
+            }
+          },
+          {
+            "title": "Mobile-ID",
+            "required": [
+              "personalCode",
+              "phoneNumber"
+            ],
+            "properties": {
+              "method": {
+                "const": "mobile_id"
+              }
+            }
+          }
+        ],
+        "properties": {
+          "audience": {
+            "type": "string",
+            "description": "The relying-party origin (must be exactly on the provider's allow-list), e.g. https://www.epaslaugos.lt.",
+            "example": "https://www.epaslaugos.lt"
+          },
+          "method": {
+            "$ref": "#/components/schemas/AuthMethod"
+          },
+          "personalCode": {
+            "type": "string",
+            "pattern": "^[0-9]{11}$",
+            "example": "39001010000",
+            "description": "Required for Smart-ID and Mobile-ID; rejected for physical/NFC."
+          },
+          "phoneNumber": {
+            "type": "string",
+            "pattern": "^\\+3706[0-9]{7}$",
+            "example": "+37061234567",
+            "description": "Required for Mobile-ID, rejected for every other method."
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional short message the client may display to the user."
+          },
+          "externalId": {
+            "type": "string",
+            "description": "Provider's own correlation id (echoed back, deduped)."
+          },
+          "webhookUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional public HTTPS webhook for the terminal status; private/non-global destinations are rejected."
+          }
+        }
+      },
+      "AuthAuthRequestCreated": {
+        "type": "object",
+        "required": [
+          "requestId",
+          "method",
+          "verificationCode",
+          "status",
+          "expiresAt"
+        ],
+        "description": "Physical requests return `clientToken`; NFC requests return `pairing`; remote methods return neither.",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "method": {
+            "$ref": "#/components/schemas/AuthMethod"
+          },
+          "verificationCode": {
+            "type": "string",
+            "description": "NFC anti-relay code, or the user verification code for Smart-ID/Mobile-ID."
+          },
+          "clientToken": {
+            "type": "string",
+            "description": "Scoped bearer JWT for physical-card `/certificate` + `/complete`; absent for remote methods."
+          },
+          "status": {
+            "$ref": "#/components/schemas/AuthStatus"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "challengeProfile": {
+            "type": "string",
+            "const": "atk-auth-v1"
+          },
+          "nonce": {
+            "type": "string",
+            "description": "Server-minted challenge nonce (see `Challenge`), so the provider backend can\nre-derive `dtbs` and verify `sig` independently - no device relay needed.\n"
+          },
+          "pairing": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AuthPairingHint"
+              }
+            ],
+            "description": "Present only when method == nfc."
+          }
+        }
+      },
+      "AuthCertificateSubmit": {
+        "type": "object",
+        "required": [
+          "certificate"
+        ],
+        "properties": {
+          "certificate": {
+            "type": "string",
+            "format": "byte",
+            "description": "Base64 DER of the card's **authentication** certificate."
+          }
+        }
+      },
+      "AuthCertificateChallenge": {
+        "type": "object",
+        "required": [
+          "requestId",
+          "dtbs",
+          "dtbsHashAlgOid",
+          "operationToken",
+          "challenge",
+          "cert"
+        ],
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dtbs": {
+            "type": "string",
+            "format": "byte",
+            "description": "Base64 of the exact digest the card must sign (ECDSA prehashed). Built as the `atk-auth-v1`\nconstruction - see `Challenge`.\n"
+          },
+          "dtbsHashAlgOid": {
+            "$ref": "#/components/schemas/AuthHashAlgOid"
+          },
+          "operationToken": {
+            "type": "string",
+            "description": "Single-use JWT bound to {tenant, requestId, purpose, certFp, dtbsHash}; the nonce is bound indirectly via dtbs. Returned at /complete."
+          },
+          "verificationCode": {
+            "type": "string"
+          },
+          "challenge": {
+            "$ref": "#/components/schemas/AuthChallenge"
+          },
+          "cert": {
+            "type": "object",
+            "required": [
+              "subject"
+            ],
+            "description": "Echoes only the parsed `subject` (the client itself just submitted the DER).\nThe certificate DER is returned at `/complete` and on GET once done.\n",
+            "properties": {
+              "subject": {
+                "$ref": "#/components/schemas/AuthCertSubject"
+              }
+            }
+          }
+        }
+      },
+      "AuthChallenge": {
+        "type": "object",
+        "description": "Canonical `atk-auth-v1` anti-relay challenge. The server issues `nonce`; `dtbs` returned above =\n`HASH( HASH(utf8(audience_origin)) || HASH(utf8(nonce)) )` with `HASH` matched to the auth-key\ncurve (P-256 -> SHA-256, P-384 -> SHA-384). Versioned - future profiles never reinterpret an\nexisting `dtbs`. This binding is what a relying party (e.g. ePaslaugos) audits.\n",
+        "required": [
+          "profile",
+          "audience",
+          "nonce"
+        ],
+        "properties": {
+          "profile": {
+            "type": "string",
+            "const": "atk-auth-v1"
+          },
+          "audience": {
+            "type": "string"
+          },
+          "nonce": {
+            "type": "string",
+            "description": "Server-issued base64url challenge string (44-128 chars)."
+          }
+        }
+      },
+      "AuthCompleteSubmit": {
+        "type": "object",
+        "required": [
+          "signature",
+          "signatureAlgorithm",
+          "operationToken"
+        ],
+        "properties": {
+          "signature": {
+            "type": "string",
+            "format": "byte",
+            "description": "Base64 raw card signature over `dtbs` (auth key)."
+          },
+          "signatureAlgorithm": {
+            "$ref": "#/components/schemas/AuthSignatureAlgorithm"
+          },
+          "signatureEncoding": {
+            "$ref": "#/components/schemas/AuthSignatureEncoding"
+          },
+          "operationToken": {
+            "type": "string"
+          }
+        }
+      },
+      "AuthAuthResult": {
+        "type": "object",
+        "required": [
+          "status",
+          "method",
+          "sig",
+          "cert"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "done"
+          },
+          "method": {
+            "$ref": "#/components/schemas/AuthMethod"
+          },
+          "sig": {
+            "type": "string",
+            "format": "byte",
+            "description": "The raw card signature over the audience-bound challenge, returned so the relying party can\nverify identity independently of `assertion`. Audience-binding prevents cross-RP relay.\n"
+          },
+          "cert": {
+            "type": "object",
+            "properties": {
+              "subject": {
+                "$ref": "#/components/schemas/AuthCertSubject"
+              },
+              "der": {
+                "type": "string",
+                "format": "byte"
+              }
+            }
+          },
+          "assertion": {
+            "type": "string",
+            "description": "Optional short-lived Tvarka-signed JWT (ES256), verifiable against the JWKS endpoint. Claims:\niss=atk.tvarka.pro, sub=<personal code>, aud=<audience>, iat, exp, jti, request_id\n(binds the assertion to this ceremony), given_name, family_name, cert_fp,\nauthentication_method, amr. NOT OIDC.\nOptional by contract - integrators may ignore it and verify the raw `sig` themselves.\n"
+          }
+        }
+      },
+      "AuthAuthRequestState": {
+        "type": "object",
+        "required": [
+          "requestId",
+          "method",
+          "status"
+        ],
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "method": {
+            "$ref": "#/components/schemas/AuthMethod"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AuthStatus"
+          },
+          "verificationCode": {
+            "type": "string",
+            "description": "Present while a Smart-ID/Mobile-ID request is non-terminal."
+          },
+          "nonce": {
+            "type": "string",
+            "description": "Server-minted challenge nonce (see `Challenge`) - enables independent `sig` verification from polling alone."
+          },
+          "cert": {
+            "type": "object",
+            "properties": {
+              "subject": {
+                "$ref": "#/components/schemas/AuthCertSubject"
+              },
+              "der": {
+                "type": "string",
+                "format": "byte",
+                "description": "Base64 DER, present once status == done."
+              }
+            }
+          },
+          "sig": {
+            "type": "string",
+            "format": "byte"
+          },
+          "assertion": {
+            "type": "string"
+          },
+          "error": {
+            "$ref": "#/components/schemas/AuthErrorBody"
+          }
+        }
+      },
+      "AuthPairingHint": {
+        "type": "object",
+        "properties": {
+          "pairingUrl": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN"
+          },
+          "deepLink": {
+            "type": "string",
+            "example": "tvarkasign://atk/pair/PAIRING_TOKEN"
+          },
+          "qrPayload": {
+            "type": "string",
+            "example": "https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN"
+          }
+        }
+      },
+      "AuthPairingInfo": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AuthPairingHint"
+          },
+          {
+            "type": "object",
+            "required": [
+              "pairingToken",
+              "expiresAt"
+            ],
+            "properties": {
+              "pairingToken": {
+                "type": "string",
+                "description": "High-entropy, one-claim, short-lived."
+              },
+              "expiresAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        ]
+      },
+      "AuthPairingClaimRequest": {
+        "type": "object",
+        "required": [
+          "pairingToken"
+        ],
+        "properties": {
+          "pairingToken": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 200
+          },
+          "claimNonce": {
+            "type": "string",
+            "maxLength": 120,
+            "description": "Optional; when the originating UI can pre-share it, binds the tap to the intended session."
+          },
+          "device": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "platform": {
+                "type": "string",
+                "maxLength": 40
+              },
+              "appVersion": {
+                "type": "string",
+                "maxLength": 40
+              },
+              "deviceName": {
+                "type": "string",
+                "maxLength": 120
+              }
+            }
+          }
+        }
+      },
+      "AuthPairingClaimResponse": {
+        "type": "object",
+        "required": [
+          "requestId",
+          "purpose",
+          "clientToken",
+          "status"
+        ],
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "auth",
+              "sign"
+            ]
+          },
+          "clientToken": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AuthStatus"
+          },
+          "summary": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Minimal display context {purpose, provider, audience, label, format?} - never document contents."
+          }
+        }
+      },
+      "AuthErrorCode": {
+        "type": "string",
+        "description": "The full stable error-code catalog of the ATK API family (auth + sign + services);\neach endpoint returns the subset that applies to it. By HTTP status:\n400 invalid_json, missing_field, invalid_field, invalid_webhook_url, invalid_document_ref.\n401 invalid_basic_credentials, invalid_client_token, client_token_expired,\noperation_token_expired, invalid_download_token.\n403 origin_not_allowed, ip_not_allowed, format_not_allowed, document_ref_host_not_allowed,\nmethod_not_allowed, tenant_suspended, tier_forbidden.\n404 request_not_found, pairing_not_found, document_not_ready.\n409 request_terminal, operation_token_spent, identity_swap, idempotency_conflict,\nservice_in_progress, pairing_not_available, pairing_already_claimed.\n410 pairing_expired. 413 document_too_large.\n422 cert_invalid, untrusted_chain, cert_revoked, cert_expired, not_qualified,\ncert_purpose_mismatch, signature_invalid, document_hash_mismatch, document_size_mismatch.\n429 rate_limited. 500 assembly_failed. 502 document_ref_fetch_failed.\n503 erasure_failed, pairing_service_unavailable, service_unavailable.\nThe catalog can grow in minor versions - fall back to HTTP status semantics\nfor codes you do not recognize.\n",
+        "enum": [
+          "invalid_json",
+          "missing_field",
+          "invalid_field",
+          "invalid_webhook_url",
+          "invalid_document_ref",
+          "invalid_basic_credentials",
+          "invalid_client_token",
+          "client_token_expired",
+          "operation_token_expired",
+          "invalid_download_token",
+          "origin_not_allowed",
+          "ip_not_allowed",
+          "format_not_allowed",
+          "document_ref_host_not_allowed",
+          "method_not_allowed",
+          "tenant_suspended",
+          "tier_forbidden",
+          "request_not_found",
+          "pairing_not_found",
+          "document_not_ready",
+          "request_terminal",
+          "operation_token_spent",
+          "identity_swap",
+          "idempotency_conflict",
+          "service_in_progress",
+          "pairing_not_available",
+          "pairing_already_claimed",
+          "pairing_expired",
+          "document_too_large",
+          "cert_invalid",
+          "untrusted_chain",
+          "cert_revoked",
+          "cert_expired",
+          "not_qualified",
+          "cert_purpose_mismatch",
+          "signature_invalid",
+          "document_hash_mismatch",
+          "document_size_mismatch",
+          "rate_limited",
+          "assembly_failed",
+          "document_ref_fetch_failed",
+          "erasure_failed",
+          "pairing_service_unavailable",
+          "service_unavailable"
+        ]
+      },
+      "AuthErrorBody": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/AuthErrorCode"
+          },
+          "message": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "retryable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AuthError": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/AuthErrorBody"
+          }
+        }
+      },
+      "AuthJwks": {
+        "type": "object",
+        "properties": {
+          "keys": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "A JWK (EC P-256, `kid`, `use:sig`, `alg:ES256`)."
+            }
+          }
+        }
+      },
+      "SignFormat": {
+        "type": "string",
+        "enum": [
+          "pades",
+          "asice",
+          "adoc",
+          "raw"
+        ],
+        "description": "pades = signed PDF; asice/adoc = XAdES-T containers; raw = a detached CAdES package from\na bare hash (no container returned). Container formats require `document` or `documentRef`.\n"
+      },
+      "SignDocumentRef": {
+        "type": "object",
+        "description": "Backend-fetched document. Hard SSRF controls apply - HTTPS only, host allow-list, no\nprivate/loopback/link-local, DNS-rebind protection, size cap enforced pre + mid stream, and the\nfetched bytes are verified against `sha256`. `authorization` is used only for the fetch, never\nlogged or persisted.\n",
+        "required": [
+          "url",
+          "sha256",
+          "sizeBytes"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{64}$"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "authorization": {
+            "type": "string",
+            "maxLength": 2048
+          }
+        }
+      },
+      "SignSignRequestCreate": {
+        "description": "ATK supports every listed format; Smart-ID/Mobile-ID support PAdES only.",
+        "oneOf": [
+          {
+            "title": "ATK raw detached CAdES",
+            "type": "object",
+            "required": [
+              "format",
+              "method",
+              "hash",
+              "hashAlgOid"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "format": {
+                "const": "raw"
+              },
+              "method": {
+                "type": "string",
+                "enum": [
+                  "physical",
+                  "nfc"
+                ],
+                "example": "physical"
+              },
+              "hash": {
+                "type": "string",
+                "format": "byte"
+              },
+              "hashAlgOid": {
+                "$ref": "#/components/schemas/SignHashAlgOid"
+              },
+              "filename": {
+                "type": "string"
+              },
+              "mimeType": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "externalId": {
+                "type": "string"
+              },
+              "webhookUrl": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          },
+          {
+            "title": "ATK PDF or container",
+            "type": "object",
+            "required": [
+              "format",
+              "method"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "format": {
+                "enum": [
+                  "pades",
+                  "asice",
+                  "adoc"
+                ]
+              },
+              "method": {
+                "type": "string",
+                "enum": [
+                  "physical",
+                  "nfc"
+                ],
+                "example": "physical"
+              },
+              "document": {
+                "type": "string",
+                "format": "byte"
+              },
+              "documentRef": {
+                "$ref": "#/components/schemas/SignDocumentRef"
+              },
+              "filename": {
+                "type": "string"
+              },
+              "mimeType": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "externalId": {
+                "type": "string"
+              },
+              "webhookUrl": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "oneOf": [
+              {
+                "required": [
+                  "document"
+                ],
+                "properties": {
+                  "document": {}
+                }
+              },
+              {
+                "required": [
+                  "documentRef"
+                ],
+                "properties": {
+                  "documentRef": {}
+                }
+              }
+            ]
+          },
+          {
+            "title": "Smart-ID PAdES",
+            "type": "object",
+            "required": [
+              "format",
+              "method",
+              "personalCode"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "format": {
+                "type": "string",
+                "const": "pades"
+              },
+              "method": {
+                "type": "string",
+                "const": "smart_id"
+              },
+              "personalCode": {
+                "type": "string",
+                "pattern": "^[0-9]{11}$",
+                "example": "39001010000"
+              },
+              "document": {
+                "type": "string",
+                "format": "byte"
+              },
+              "documentRef": {
+                "$ref": "#/components/schemas/SignDocumentRef"
+              },
+              "filename": {
+                "type": "string"
+              },
+              "mimeType": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "externalId": {
+                "type": "string"
+              },
+              "webhookUrl": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "oneOf": [
+              {
+                "required": [
+                  "document"
+                ],
+                "properties": {
+                  "document": {}
+                }
+              },
+              {
+                "required": [
+                  "documentRef"
+                ],
+                "properties": {
+                  "documentRef": {}
+                }
+              }
+            ]
+          },
+          {
+            "title": "Mobile-ID PAdES",
+            "type": "object",
+            "required": [
+              "format",
+              "method",
+              "personalCode",
+              "phoneNumber"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "format": {
+                "type": "string",
+                "const": "pades"
+              },
+              "method": {
+                "type": "string",
+                "const": "mobile_id"
+              },
+              "personalCode": {
+                "type": "string",
+                "pattern": "^[0-9]{11}$",
+                "example": "39001010000"
+              },
+              "phoneNumber": {
+                "type": "string",
+                "pattern": "^\\+3706[0-9]{7}$",
+                "example": "+37061234567"
+              },
+              "document": {
+                "type": "string",
+                "format": "byte"
+              },
+              "documentRef": {
+                "$ref": "#/components/schemas/SignDocumentRef"
+              },
+              "filename": {
+                "type": "string"
+              },
+              "mimeType": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "externalId": {
+                "type": "string"
+              },
+              "webhookUrl": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "oneOf": [
+              {
+                "required": [
+                  "document"
+                ],
+                "properties": {
+                  "document": {}
+                }
+              },
+              {
+                "required": [
+                  "documentRef"
+                ],
+                "properties": {
+                  "documentRef": {}
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "SignSignRequestCreated": {
+        "type": "object",
+        "required": [
+          "requestId",
+          "method",
+          "verificationCode",
+          "status",
+          "expiresAt"
+        ],
+        "description": "Physical requests return `clientToken`; NFC returns `pairing`; remote methods return neither.",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "method": {
+            "$ref": "#/components/schemas/SignMethod"
+          },
+          "verificationCode": {
+            "type": "string",
+            "description": "NFC anti-relay code, or the user verification code for Smart-ID/Mobile-ID."
+          },
+          "clientToken": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SignStatus"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pairing": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SignPairingHint"
+              }
+            ],
+            "description": "Present only when method == nfc."
+          }
+        }
+      },
+      "SignSignCertificateSubmit": {
+        "type": "object",
+        "required": [
+          "certificate"
+        ],
+        "properties": {
+          "certificate": {
+            "type": "string",
+            "format": "byte",
+            "description": "Base64 DER of the card's signing certificate."
+          }
+        }
+      },
+      "SignSignCertificateChallenge": {
+        "type": "object",
+        "required": [
+          "requestId",
+          "dtbs",
+          "dtbsHashAlgOid",
+          "operationToken",
+          "cert",
+          "signing"
+        ],
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dtbs": {
+            "type": "string",
+            "format": "byte",
+            "description": "Base64 of the exact digest the card signs (e.g. for PAdES, the curve-matched digest of the CAdES SignedAttributes)."
+          },
+          "dtbsHashAlgOid": {
+            "$ref": "#/components/schemas/SignHashAlgOid"
+          },
+          "operationToken": {
+            "type": "string"
+          },
+          "verificationCode": {
+            "type": "string"
+          },
+          "cert": {
+            "type": "object",
+            "properties": {
+              "subject": {
+                "$ref": "#/components/schemas/SignCertSubject"
+              }
+            }
+          },
+          "signing": {
+            "type": "object",
+            "properties": {
+              "format": {
+                "$ref": "#/components/schemas/SignFormat"
+              },
+              "signatureEncodingHints": {
+                "type": "string",
+                "description": "Optional hint for how the card signature should be encoded before submission (P1363 vs DER)."
+              }
+            }
+          }
+        }
+      },
+      "SignSignCompleteSubmit": {
+        "type": "object",
+        "required": [
+          "signature",
+          "signatureAlgorithm",
+          "operationToken"
+        ],
+        "properties": {
+          "signature": {
+            "type": "string",
+            "format": "byte",
+            "description": "Base64 raw card signature over `dtbs` (QES key)."
+          },
+          "signatureAlgorithm": {
+            "$ref": "#/components/schemas/SignSignatureAlgorithm"
+          },
+          "signatureEncoding": {
+            "$ref": "#/components/schemas/SignSignatureEncoding"
+          },
+          "operationToken": {
+            "type": "string"
+          }
+        }
+      },
+      "SignValidation": {
+        "type": "object",
+        "description": "The advisory validation axis. Independent of `status`. See the two-axes note.",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "passed",
+              "failed",
+              "notApplicable"
+            ]
+          },
+          "level": {
+            "type": "string",
+            "description": "e.g. QUALIFIED_VALID, VALID_NOT_QUALIFIED, INDETERMINATE."
+          },
+          "report": {
+            "type": "string",
+            "description": "Optional pointer/id to the stored validation report."
+          }
+        }
+      },
+      "SignValidationServiceRequest": {
+        "type": "object",
+        "required": [
+          "format"
+        ],
+        "additionalProperties": false,
+        "oneOf": [
+          {
+            "required": [
+              "document"
+            ],
+            "properties": {
+              "document": {},
+              "documentRef": {}
+            },
+            "not": {
+              "required": [
+                "documentRef"
+              ],
+              "properties": {
+                "documentRef": {}
+              }
+            }
+          },
+          {
+            "required": [
+              "documentRef"
+            ],
+            "properties": {
+              "documentRef": {},
+              "document": {}
+            },
+            "not": {
+              "required": [
+                "document"
+              ],
+              "properties": {
+                "document": {}
+              }
+            }
+          }
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "pades",
+              "asice",
+              "adoc"
+            ]
+          },
+          "filename": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "document": {
+            "type": "string",
+            "format": "byte"
+          },
+          "documentRef": {
+            "$ref": "#/components/schemas/SignDocumentRef"
+          },
+          "policy": {
+            "type": "string",
+            "enum": [
+              "qes",
+              "aes"
+            ],
+            "default": "qes"
+          }
+        }
+      },
+      "SignTimestampServiceRequest": {
+        "type": "object",
+        "required": [
+          "format"
+        ],
+        "additionalProperties": false,
+        "oneOf": [
+          {
+            "required": [
+              "document"
+            ],
+            "properties": {
+              "document": {},
+              "documentRef": {}
+            },
+            "not": {
+              "required": [
+                "documentRef"
+              ],
+              "properties": {
+                "documentRef": {}
+              }
+            }
+          },
+          {
+            "required": [
+              "documentRef"
+            ],
+            "properties": {
+              "documentRef": {},
+              "document": {}
+            },
+            "not": {
+              "required": [
+                "document"
+              ],
+              "properties": {
+                "document": {}
+              }
+            }
+          }
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": [
+              "asice",
+              "adoc"
+            ]
+          },
+          "filename": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "document": {
+            "type": "string",
+            "format": "byte"
+          },
+          "documentRef": {
+            "$ref": "#/components/schemas/SignDocumentRef"
+          }
+        }
+      },
+      "SignArchiveServiceRequest": {
+        "type": "object",
+        "required": [
+          "format"
+        ],
+        "additionalProperties": false,
+        "oneOf": [
+          {
+            "required": [
+              "document"
+            ],
+            "properties": {
+              "document": {},
+              "documentRef": {}
+            },
+            "not": {
+              "required": [
+                "documentRef"
+              ],
+              "properties": {
+                "documentRef": {}
+              }
+            }
+          },
+          {
+            "required": [
+              "documentRef"
+            ],
+            "properties": {
+              "documentRef": {},
+              "document": {}
+            },
+            "not": {
+              "required": [
+                "document"
+              ],
+              "properties": {
+                "document": {}
+              }
+            }
+          }
+        ],
+        "properties": {
+          "format": {
+            "type": "string",
+            "const": "pades"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "document": {
+            "type": "string",
+            "format": "byte"
+          },
+          "documentRef": {
+            "$ref": "#/components/schemas/SignDocumentRef"
+          }
+        }
+      },
+      "SignValidationServiceResult": {
+        "type": "object",
+        "required": [
+          "requestId",
+          "status",
+          "validation"
+        ],
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "const": "done"
+          },
+          "validation": {
+            "type": "object",
+            "required": [
+              "status",
+              "level",
+              "policy",
+              "report"
+            ],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "passed",
+                  "failed",
+                  "structural"
+                ],
+                "description": "`passed`/`failed` come from SiVa (pades/asice). ADOC uses the internal\nstructural inspector and never returns `passed`; a structurally sound\ncontainer yields `structural`.\n"
+              },
+              "level": {
+                "type": "string"
+              },
+              "policy": {
+                "type": "string",
+                "enum": [
+                  "qes",
+                  "aes"
+                ]
+              },
+              "report": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      },
+      "SignLtvServiceResult": {
+        "type": "object",
+        "required": [
+          "requestId",
+          "status",
+          "service",
+          "format",
+          "downloadToken"
+        ],
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "const": "done"
+          },
+          "service": {
+            "type": "string",
+            "enum": [
+              "timestamp",
+              "archive"
+            ]
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "pades",
+              "asice",
+              "adoc"
+            ]
+          },
+          "timestampedSignatures": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "changed": {
+            "type": "boolean"
+          },
+          "level": {
+            "type": "string"
+          },
+          "signatureField": {
+            "type": "string"
+          },
+          "downloadToken": {
+            "type": "string"
+          }
+        }
+      },
+      "SignSignResult": {
+        "type": "object",
+        "required": [
+          "status",
+          "method",
+          "validation",
+          "cert"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "done"
+          },
+          "method": {
+            "$ref": "#/components/schemas/SignMethod"
+          },
+          "validation": {
+            "$ref": "#/components/schemas/SignValidation"
+          },
+          "sig": {
+            "type": "string",
+            "format": "byte",
+            "description": "For `format:\"raw\"`, the detached signature package. Absent for container formats (download the container instead)."
+          },
+          "sigAlgOid": {
+            "type": "string"
+          },
+          "cert": {
+            "type": "object",
+            "properties": {
+              "subject": {
+                "$ref": "#/components/schemas/SignCertSubject"
+              }
+            }
+          },
+          "downloadToken": {
+            "type": "string",
+            "description": "One-off token for GET /sign/{id}/document."
+          }
+        }
+      },
+      "SignSignRequestState": {
+        "type": "object",
+        "required": [
+          "requestId",
+          "method",
+          "status"
+        ],
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "method": {
+            "$ref": "#/components/schemas/SignMethod"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SignStatus"
+          },
+          "verificationCode": {
+            "type": "string",
+            "description": "Present while a Smart-ID/Mobile-ID request is non-terminal."
+          },
+          "validation": {
+            "$ref": "#/components/schemas/SignValidation"
+          },
+          "cert": {
+            "type": "object",
+            "properties": {
+              "subject": {
+                "$ref": "#/components/schemas/SignCertSubject"
+              }
+            }
+          },
+          "sig": {
+            "type": "string",
+            "format": "byte"
+          },
+          "sigAlgOid": {
+            "type": "string"
+          },
+          "downloadToken": {
+            "type": "string"
+          },
+          "error": {
+            "$ref": "#/components/schemas/SignErrorBody"
+          }
+        }
+      },
+      "SignMethod": {
+        "type": "string",
+        "enum": [
+          "physical",
+          "nfc",
+          "smart_id",
+          "mobile_id"
+        ],
+        "example": "physical",
+        "description": "physical/NFC use card endpoints; smart_id/mobile_id complete server-side and support PAdES only."
+      },
+      "SignStatus": {
+        "type": "string",
+        "description": "Non-terminal - pending/awaitingCard/awaitingCredentials/finalizing. Terminal success - done.\nTerminal failure - cancelled/timeout/deviceError/pinBlocked/cardRemoved/certInvalid.\nValidation failure is on the `validation` axis, NOT here.\n",
+        "enum": [
+          "pending",
+          "awaitingCard",
+          "awaitingCredentials",
+          "finalizing",
+          "done",
+          "cancelled",
+          "timeout",
+          "deviceError",
+          "pinBlocked",
+          "cardRemoved",
+          "certInvalid"
+        ]
+      },
+      "SignHashAlgOid": {
+        "type": "string",
+        "enum": [
+          "2.16.840.1.101.3.4.2.1",
+          "2.16.840.1.101.3.4.2.2"
+        ],
+        "description": "SHA-256 / SHA-384 OID, curve-matched."
+      },
+      "SignSignatureAlgorithm": {
+        "type": "string",
+        "enum": [
+          "ES256",
+          "ES384"
+        ]
+      },
+      "SignSignatureEncoding": {
+        "type": "string",
+        "enum": [
+          "P1363",
+          "DER"
+        ],
+        "default": "P1363",
+        "description": "Informational - the server auto-detects and accepts either encoding regardless of this field."
+      },
+      "SignCertSubject": {
+        "type": "object",
+        "properties": {
+          "serialNumber": {
+            "type": "string",
+            "example": "PNOLT-39001010000"
+          },
+          "givenName": {
+            "type": "string"
+          },
+          "sn": {
+            "type": "string"
+          },
+          "cn": {
+            "type": "string"
+          },
+          "c": {
+            "type": "string",
+            "example": "LT"
+          }
+        }
+      },
+      "SignPairingHint": {
+        "type": "object",
+        "properties": {
+          "pairingUrl": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN"
+          },
+          "deepLink": {
+            "type": "string",
+            "example": "tvarkasign://atk/pair/PAIRING_TOKEN"
+          },
+          "qrPayload": {
+            "type": "string",
+            "example": "https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN"
+          }
+        }
+      },
+      "SignPairingInfo": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SignPairingHint"
+          },
+          {
+            "type": "object",
+            "required": [
+              "pairingToken",
+              "expiresAt"
+            ],
+            "properties": {
+              "pairingToken": {
+                "type": "string"
+              },
+              "expiresAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        ]
+      },
+      "SignErrorCode": {
+        "type": "string",
+        "description": "The full stable error-code catalog of the ATK API family (auth + sign + services);\neach endpoint returns the subset that applies to it. By HTTP status:\n400 invalid_json, missing_field, invalid_field, invalid_webhook_url, invalid_document_ref.\n401 invalid_basic_credentials, invalid_client_token, client_token_expired,\noperation_token_expired, invalid_download_token.\n403 origin_not_allowed, ip_not_allowed, format_not_allowed, document_ref_host_not_allowed,\nmethod_not_allowed, tenant_suspended, tier_forbidden.\n404 request_not_found, pairing_not_found, document_not_ready.\n409 request_terminal, operation_token_spent, identity_swap, idempotency_conflict,\nservice_in_progress, pairing_not_available, pairing_already_claimed.\n410 pairing_expired. 413 document_too_large.\n422 cert_invalid, untrusted_chain, cert_revoked, cert_expired, not_qualified,\ncert_purpose_mismatch, signature_invalid, document_hash_mismatch, document_size_mismatch.\n429 rate_limited. 500 assembly_failed. 502 document_ref_fetch_failed.\n503 erasure_failed, pairing_service_unavailable, service_unavailable.\nThe catalog can grow in minor versions - fall back to HTTP status semantics\nfor codes you do not recognize.\n",
+        "enum": [
+          "invalid_json",
+          "missing_field",
+          "invalid_field",
+          "invalid_webhook_url",
+          "invalid_document_ref",
+          "invalid_basic_credentials",
+          "invalid_client_token",
+          "client_token_expired",
+          "operation_token_expired",
+          "invalid_download_token",
+          "origin_not_allowed",
+          "ip_not_allowed",
+          "format_not_allowed",
+          "document_ref_host_not_allowed",
+          "method_not_allowed",
+          "tenant_suspended",
+          "tier_forbidden",
+          "request_not_found",
+          "pairing_not_found",
+          "document_not_ready",
+          "request_terminal",
+          "operation_token_spent",
+          "identity_swap",
+          "idempotency_conflict",
+          "service_in_progress",
+          "pairing_not_available",
+          "pairing_already_claimed",
+          "pairing_expired",
+          "document_too_large",
+          "cert_invalid",
+          "untrusted_chain",
+          "cert_revoked",
+          "cert_expired",
+          "not_qualified",
+          "cert_purpose_mismatch",
+          "signature_invalid",
+          "document_hash_mismatch",
+          "document_size_mismatch",
+          "rate_limited",
+          "assembly_failed",
+          "document_ref_fetch_failed",
+          "erasure_failed",
+          "pairing_service_unavailable",
+          "service_unavailable"
+        ]
+      },
+      "SignErrorBody": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/SignErrorCode",
+            "description": "Stable machine code. documentRef failures use `invalid_document_ref`,\n`document_ref_host_not_allowed`, `document_ref_fetch_failed`,\n`document_size_mismatch`, `document_hash_mismatch`, or `document_too_large`.\n"
+          },
+          "message": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "retryable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SignError": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/SignErrorBody"
+          }
+        }
+      }
+    },
+    "responses": {
+      "AuthBadRequest": {
+        "description": "Malformed input.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AuthError"
+            }
+          }
+        }
+      },
+      "AuthUnauthorized": {
+        "description": "Missing/invalid credentials or client token.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AuthError"
+            }
+          }
+        }
+      },
+      "AuthForbidden": {
+        "description": "Authorized but not permitted (origin/format/tenant).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AuthError"
+            }
+          }
+        }
+      },
+      "AuthNotFound": {
+        "description": "Unknown request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AuthError"
+            }
+          }
+        }
+      },
+      "AuthConflict": {
+        "description": "State/idempotency conflict (spent operation token, identity swap, terminal request).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AuthError"
+            }
+          }
+        }
+      },
+      "AuthUnprocessable": {
+        "description": "Semantic reject (cert purpose/chain/revocation, dtbs mismatch, bad signature).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AuthError"
+            }
+          }
+        }
+      },
+      "AuthRateLimited": {
+        "description": "Too many requests.",
+        "headers": {
+          "Retry-After": {
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Seconds."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AuthError"
+            }
+          }
+        }
+      },
+      "AuthServiceUnavailable": {
+        "description": "A required remote or erasure service is temporarily unavailable.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AuthError"
+            }
+          }
+        }
+      },
+      "SignBadRequest": {
+        "description": "Malformed input (e.g. container format without document, hash without raw).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SignError"
+            }
+          }
+        }
+      },
+      "SignUnauthorized": {
+        "description": "Missing/invalid credentials or client token.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SignError"
+            }
+          }
+        }
+      },
+      "SignForbidden": {
+        "description": "Format not allowed / origin not allowed / tenant suspended.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SignError"
+            }
+          }
+        }
+      },
+      "SignNotFound": {
+        "description": "Unknown request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SignError"
+            }
+          }
+        }
+      },
+      "SignConflict": {
+        "description": "Spent operation token, identity swap, terminal request, or idempotency conflict/in-progress operation.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SignError"
+            }
+          }
+        }
+      },
+      "SignUnprocessable": {
+        "description": "Cert purpose/chain/revocation/qualified reject, dtbs mismatch, bad signature, doc hash mismatch.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SignError"
+            }
+          }
+        }
+      },
+      "SignTooLarge": {
+        "description": "Document exceeds the tenant's max size.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SignError"
+            }
+          }
+        }
+      },
+      "SignRateLimited": {
+        "description": "Too many requests.",
+        "headers": {
+          "Retry-After": {
+            "schema": {
+              "type": "integer"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SignError"
+            }
+          }
+        }
+      },
+      "SignServiceUnavailable": {
+        "description": "Validation/TSA/revocation dependency failed transiently; retry with the same Idempotency-Key.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SignError"
+            }
+          }
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Quickstart, SDKs, test data, pricing and lifecycle policy",
+    "url": "https://atk.tvarka.pro/docs/"
+  },
+  "x-publication": {
+    "specialistContracts": [
+      "https://atk.tvarka.pro/openapi/auth.yaml",
+      "https://atk.tvarka.pro/openapi/sign.yaml"
+    ],
+    "postmanCollections": [
+      "https://atk.tvarka.pro/postman/auth.json",
+      "https://atk.tvarka.pro/postman/sign.json"
+    ]
+  },
+  "webhooks": {
+    "signStatus": {
+      "post": {
+        "operationId": "receiveSignStatus",
+        "summary": "Terminal status + validation-change callback (per-tenant HMAC-signed)",
+        "description": "Sent to the provider's `webhookUrl` on terminal `status` and on every `validation.status` change.\nHeaders - `X-Atk-Signature: sha256=<HMAC-SHA256(secret, raw-body)>`, `X-Atk-Idempotency-Key`, and\na timestamp. At-least-once; verify the MAC, reject stale timestamps, dedupe by idempotency key.\n",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignSignRequestState"
+              }
+            }
+          }
+        },
+        "responses": {
+          "2XX": {
+            "description": "Acknowledged."
+          }
+        }
+      }
+    }
+  }
+}

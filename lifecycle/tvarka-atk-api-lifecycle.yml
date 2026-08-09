@@ -1,0 +1,69 @@
+generated: '2026-08-09'
+method: searched
+source: https://atk.tvarka.pro/docs/lifecycle/
+versioning:
+  scheme: uri-path
+  current: v1
+  contract_version: 1.3.0
+  docs: https://atk.tvarka.pro/docs/lifecycle/
+  policy: >-
+    Additive fields, methods and operations may be introduced within /v1. Existing clients must
+    ignore response fields they do not use. A breaking request or response change requires a new
+    major resource family.
+deprecation:
+  policy_url: https://atk.tvarka.pro/docs/lifecycle/
+  sunset_header: false
+  deprecation_header: false
+  policy: >-
+    Any future retirement notice will name the affected operation and final availability date. No
+    /v1 retirement is scheduled as of 2026-08-09.
+  note: >-
+    The policy is published in prose; RFC 8594 Sunset / Deprecation response headers are not
+    documented in the OpenAPI or the lifecycle page.
+sla:
+  url: null
+  uptime_target: null
+  note: >-
+    No numeric uptime commitment is published. Production terms are set during onboarding
+    (https://atk.tvarka.pro/docs/access/); commercial terms at https://tvarka.pro/salygos/.
+status_page: https://atk.tvarka.pro/status/
+status_machine_readable:
+  json: https://atk.tvarka.pro/status.json
+  atom: https://atk.tvarka.pro/status/feed.xml
+  health_probe: https://atk.tvarka.pro/health/
+  components: [Authentication API, Signing API, Validation and trust services, Developer documentation and downloads]
+  history_window_days: 90
+  observed:
+    checked: '2026-08-09'
+    status: operational
+    active_incidents: 0
+    incidents_last_90_days: 0
+retention:
+  default_days: 30
+  reducible_by_contract: true
+  purge_scope: >-
+    Document/result bytes, certificates, derived identity data, filenames, messages and per-request
+    callback details.
+  retained_after_purge: >-
+    A pseudonymous certificate fingerprint and the minimal usage/audit row, for replay prevention,
+    abuse investigation and billing integrity.
+  on_demand:
+    per_request: [deleteAuthRequest, deleteSignRequest]
+    bulk: bulkErasure
+operational_defaults:
+  max_document_size: 15 MiB per provider unless contracted otherwise
+  sandbox_content: synthetic/test data only
+  delivery: polling or at-least-once HMAC-signed webhook; deduplicate by idempotency key
+deprecated_operations: []
+release_history:
+  - version: 1.3.0
+    capability: Optional Smart-ID and Mobile-ID authentication and PAdES signing methods.
+  - version: 1.2.0
+    capability: Contract-fidelity and signing-result validation corrections.
+  - version: 1.1.0
+    capability: Additional signatures, standalone validation, timestamp and archive services.
+  - version: 1.0.0
+    capability: ATK physical/NFC authentication and qualified signing.
+notes: >-
+  The release history is published without dates; see changelog/tvarka-atk-api-changelog.yml for the
+  same window in changelog shape.

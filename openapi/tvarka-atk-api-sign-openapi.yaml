@@ -1,0 +1,972 @@
+openapi: 3.1.0
+
+info:
+  title: Tvarka ATK - QES Signing API (paid-tier addendum)
+  version: 1.3.0
+  summary: LT ATK qualified signing, with optional Smart-ID and Mobile-ID PAdES methods.
+  description: |
+    The QES half of the ATK API - `/v1/sign/*`. This is the **paid-tier addendum** to
+    `tvarka_atk_auth_api.openapi.yaml`: same providers, same credential model, same card stack and
+    two-phase ceremony; QES adds document assembly, an async validation axis, and metering. The shared
+    primitive schemas + security schemes are mirrored here so this file validates standalone; they are
+    identical to the auth contract.
+
+    ## Flow (same shape as auth, over a document)
+      1. `POST /v1/sign/requests` (HTTP Basic) - the provider supplies the document (bytes or an
+         allow-listed `documentRef`, or a bare `hash` for `format:"raw"`), and receives `clientToken`.
+      2. `POST /v1/sign/{requestId}/certificate` (Bearer clientToken) - the client submits the card's
+         **signing** certificate; the API prepares the format-specific DTBS and returns it +
+         `operationToken`.
+      3. The client drives the card to sign the DTBS with the QES key (after PIN).
+      4. `POST /v1/sign/{requestId}/complete` (Bearer clientToken) - the API verifies the signature,
+         assembles + timestamps the AdES container, and returns `status:"done"` with
+         `validation:{status:"pending"}`.
+
+    ## Smart-ID and Mobile-ID flow
+      For `method:"smart_id"` or `method:"mobile_id"`, create a PAdES request with `personalCode`
+      and, for Mobile-ID, `phoneNumber`. The response has a user verification code and no
+      `clientToken`; poll GET with Basic credentials or consume the terminal webhook. The
+      `/certificate` and `/complete` calls are not used. Remote methods are PAdES-only in v1.3;
+      physical/NFC remain available for raw, ASiC-E, and ADOC.
+
+    ## Two axes: `done` vs `validation`
+      * `status:"done"` = the container is assembled AND the signer signature is verified. This is the
+        deliverable and the **billable** event.
+      * `validation.status` transitions `pending -> passed | failed` **asynchronously** (SiVa runs after
+        completion). The validator is **advisory, not authoritative** (LT/EU trusted-list snapshots have
+        wrongly flagged the primary QTSA); a sub-qualified result raises an alarm for review - it does
+        NOT change `status`, invalidate the container, or reverse billing.
+
+    ## Billing
+      One usage event **at completion**, never gated on an advisory validator: `atk.sign` for a signing
+      ceremony, and `atk.validate` / `atk.timestamp` / `atk.archive` for the v1.1 synchronous services.
+      Auth (`atk.auth`) is a separate, also-invoiceable event; whether a provider/tier is actually
+      charged is a pricing decision (ePaslaugos = zero-rated free tier; third parties = metered).
+
+    ## Timestamp + revocation
+      Qualified timestamp uses **APED** as the primary QTSA (BalTstamp fallback; ACCV opt-in for a
+      personal tier). The embedded revocation (OCSP) is fetched fresh at signing time and **never cached
+      or prefetched** - a cached OCSP response invalidates the signature.
+
+    ## Get access
+      Request a zero-rated sandbox key at <https://atk.tvarka.pro/docs/access/> (issued after a short
+      review). Full docs, rendered reference, and Postman collections at <https://atk.tvarka.pro/docs/>.
+  termsOfService: https://tvarka.pro
+  contact: { name: Tvarka, url: https://atk.tvarka.pro/docs/, email: info@tvarka.pro }
+  license: { name: Proprietary, url: https://tvarka.pro }
+  x-status: >-
+    IMPLEMENTED through 2026-08-02 (tvarka/atk/ Django app): /sign/* physical and NFC ceremony for
+    pades/raw/asice/adoc with inline or allow-listed documentRef input; TSA + B-LT/XAdES-T; async
+    advisory SiVa; atk.sign metering at done; HMAC-signed `signStatus` webhooks (terminal + validation);
+    per-provider rate limiting; finalizing-reaper crash recovery; retention purge + deletion (POST
+    /v1/sign/{id}/delete, POST /v1/erasure). Sandbox IMPLEMENTED: environment=sandbox requests sign with
+    Tvarka-issued test cards and produce deliberately non-qualified B-level artifacts (ATK_SANDBOX_TSA_URL
+    instead of the production TSA, no B-LT upgrade, no SiVa — validation is `notApplicable`). Bare XAdES
+    is intentionally outside v1; XAdES-T is delivered inside ASiC-E and ADOC. v1.1 accepts already-signed
+    PAdES/ASiC-E/ADOC inputs for an additional signature, plus configuration-gated server-side Smart-ID/Mobile-ID PAdES,
+    and exposes Basic-authenticated standalone
+    validation, XAdES timestamping, and PAdES B-LT archive upgrade services with replay-safe metering.
+    Android is the current production NFC client boundary; iOS client source is pre-release pending the
+    Apple Developer account plus CoreNFC real-card release gates.
+
+servers:
+  - url: https://atk.tvarka.pro/v1
+    description: |
+      Production. Sandbox runs on the same host - provider credentials issued with
+      environment=sandbox get the identical API against test-card material and are never billed.
+
+tags:
+  - name: Sign
+    description: The QES signing ceremony (`/v1/sign/*`).
+  - name: Validation
+    description: Standalone advisory validation of signed artifacts.
+  - name: LTV
+    description: Post-signature timestamp and long-term-validation upgrades.
+
+security:
+  - basicAuth: []
+
+webhooks:
+  signStatus:
+    post:
+      operationId: receiveSignStatus
+      summary: Terminal status + validation-change callback (per-tenant HMAC-signed)
+      description: |
+        Sent to the provider's `webhookUrl` on terminal `status` and on every `validation.status` change.
+        Headers - `X-Atk-Signature: sha256=<HMAC-SHA256(secret, raw-body)>`, `X-Atk-Idempotency-Key`, and
+        a timestamp. At-least-once; verify the MAC, reject stale timestamps, dedupe by idempotency key.
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SignRequestState' }
+      responses:
+        '2XX': { description: Acknowledged. }
+
+paths:
+
+  /sign/requests:
+    post:
+      tags: [Sign]
+      operationId: createSignRequest
+      summary: Create a signing request (server-to-server)
+      description: |
+        HTTP Basic. Provide the document one of three ways - inline `document` (base64), an allow-listed
+        `documentRef`, or a bare `hash` (only for `format:"raw"`). Container formats
+        (pades/asice/adoc) require exactly one of `document` or `documentRef`. PAdES accepts an unsigned
+        or already-signed PDF; ASiC-E/ADOC accept either a PDF (Tvarka constructs a new single-payload
+        container) or an existing valid container, which is treated as an opaque whole and receives one
+        additional signature without payload or attachment edits. Physical requests return a client
+        token, NFC returns a pairing hint, and Smart-ID/Mobile-ID return a user verification code.
+        Remote methods are PAdES-only and stay server-side.
+      x-codeSamples:
+        - lang: curl
+          label: Smart-ID PAdES
+          source: |
+            curl -u "$ATK_KEY_ID:$ATK_KEY_SECRET" https://atk.tvarka.pro/v1/sign/requests \
+              -H 'Content-Type: application/json' \
+              -d '{"format":"pades","method":"smart_id","personalCode":"39001010000","document":"<base64-pdf>"}'
+        - lang: curl
+          label: Mobile-ID PAdES
+          source: |
+            curl -u "$ATK_KEY_ID:$ATK_KEY_SECRET" https://atk.tvarka.pro/v1/sign/requests \
+              -H 'Content-Type: application/json' \
+              -d '{"format":"pades","method":"mobile_id","personalCode":"39001010000","phoneNumber":"+37061234567","document":"<base64-pdf>"}'
+      security: [ { basicAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SignRequestCreate' }
+            examples:
+              physicalAtk:
+                summary: Primary ATK PAdES method
+                value: { format: pades, method: physical, document: JVBERi0xLjQK }
+              smartId:
+                summary: Optional Smart-ID PAdES method
+                value: { format: pades, method: smart_id, personalCode: '39001010000', document: JVBERi0xLjQK }
+              mobileId:
+                summary: Optional Mobile-ID PAdES method
+                value: { format: pades, method: mobile_id, personalCode: '39001010000', phoneNumber: '+37061234567', document: JVBERi0xLjQK }
+      responses:
+        '202':
+          description: Request created; awaiting the ATK client or remote user authorization.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SignRequestCreated' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '413': { $ref: '#/components/responses/TooLarge' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+
+  /sign/{requestId}/certificate:
+    post:
+      tags: [Sign]
+      operationId: submitSignCertificate
+      summary: Submit the card's signing certificate; receive the DTBS
+      description: |
+        Bearer clientToken. The API validates the certificate (chain, revocation, purpose =
+        signing/content-commitment, qualified/QSCD evidence), prepares the format-specific DTBS (for
+        PAdES - the SHA-256 CAdES SignedAttributes digest; SHA-256 for both key curves), and returns
+        it + `operationToken`. Physical/NFC only.
+      security: [ { clientToken: [] } ]
+      parameters: [ { $ref: '#/components/parameters/RequestId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SignCertificateSubmit' }
+      responses:
+        '200':
+          description: DTBS + operation token.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SignCertificateChallenge' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+
+  /sign/{requestId}/complete:
+    post:
+      tags: [Sign]
+      operationId: completeSign
+      summary: Submit the raw card signature; assemble the container
+      description: |
+        Bearer clientToken + single-use `operationToken`. Synchronous: the API verifies the signature
+        against the stored DTBS + cert, assembles + timestamps the AdES container inline, schedules
+        async validation, and returns `200 done` with `validation:{status:"pending"}` (or
+        `notApplicable` in sandbox/raw, or the internal ADOC verdict). `finalizing` is observable via
+        GET only if a crash wedges the request until the reaper releases it. Retry-safe; a transient
+        assembly failure returns a retryable 5xx with the operation released; one `atk.sign` charge
+        at `done`. Physical/NFC only; remote methods complete asynchronously.
+      security: [ { clientToken: [] } ]
+      parameters: [ { $ref: '#/components/parameters/RequestId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SignCompleteSubmit' }
+      responses:
+        '200':
+          description: Done - container assembled + signature verified.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SignResult' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+
+  /sign/{requestId}:
+    get:
+      tags: [Sign]
+      operationId: getSignRequest
+      summary: Poll status + validation axis; fetch the result
+      security: [ { basicAuth: [] }, { clientToken: [] } ]
+      parameters: [ { $ref: '#/components/parameters/RequestId' } ]
+      responses:
+        '200':
+          description: Current state.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SignRequestState' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /sign/{requestId}/document:
+    get:
+      tags: [Sign]
+      operationId: downloadSignedDocument
+      summary: Download the signed container
+      description: Authorized by the provider's Basic credentials or a `downloadToken` query param.
+      security: [ { basicAuth: [] }, { downloadToken: [] } ]
+      parameters: [ { $ref: '#/components/parameters/RequestId' } ]
+      responses:
+        '200':
+          description: The signed container bytes.
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /sign/{requestId}/cancel:
+    post:
+      tags: [Sign]
+      operationId: cancelSignRequest
+      summary: Cancel a non-terminal request
+      security: [ { basicAuth: [] }, { clientToken: [] } ]
+      parameters: [ { $ref: '#/components/parameters/RequestId' } ]
+      responses:
+        '200':
+          description: Cancelled.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SignRequestState' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /sign/{requestId}/delete:
+    post:
+      tags: [Erasure]
+      operationId: deleteSignRequest
+      summary: Erase one request on demand (GDPR)
+      description: |
+        Basic only, scoped to the caller's own provider. A non-terminal request is cancelled first,
+        then its document/container bytes + derived personal data are purged (exactly what the
+        retention job strips); a de-identified audit row remains. Idempotent. Bulk erasure lives on
+        the base API (`POST /v1/erasure`) and covers sign requests too.
+      security: [ { basicAuth: [] } ]
+      parameters: [ { $ref: '#/components/parameters/RequestId' } ]
+      responses:
+        '200':
+          description: Erased.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requestId: { type: string, format: uuid }
+                  deleted: { type: boolean }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /sign/{requestId}/pairing:
+    get:
+      tags: [Sign]
+      operationId: getSignPairing
+      summary: Rotate and return the NFC pairing token for a sign request
+      security: [ { basicAuth: [] } ]
+      parameters: [ { $ref: '#/components/parameters/RequestId' } ]
+      responses:
+        '200':
+          description: Newly rotated pairing token and links.
+          content: { application/json: { schema: { $ref: '#/components/schemas/PairingInfo' } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /validation:
+    post:
+      tags: [Validation]
+      operationId: validateDocument
+      summary: Validate an existing signed document or container
+      description: |
+        Paid-tier, Basic-authenticated synchronous service. SiVa backs PAdES/ASiC-E and can return
+        `passed`/`failed`. ADOC runs Tvarka's internal STRUCTURAL inspector, which performs no
+        cryptographic verification and therefore never returns `passed` - a structurally sound ADOC
+        yields `status: structural`. The verdict is advisory, not a regulatory conclusion. A
+        successful service call emits exactly one `atk.validate` event. `Idempotency-Key` makes network
+        retries replay the original response without a second event.
+      security: [ { basicAuth: [] } ]
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ValidationServiceRequest' }
+      responses:
+        '200':
+          description: Advisory validation result.
+          content: { application/json: { schema: { $ref: '#/components/schemas/ValidationServiceResult' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '413': { $ref: '#/components/responses/TooLarge' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+
+  /timestamp:
+    post:
+      tags: [LTV]
+      operationId: timestampDocument
+      summary: Add qualified timestamps to untimestamped XAdES signatures
+      description: |
+        Paid-tier, Basic-authenticated synchronous service for ASiC-E and ADOC. Every XAdES signature
+        without SignatureTimeStamp receives an RFC 3161 token; existing timestamps are preserved. Emits
+        exactly one `atk.timestamp` event and returns a one-off output download token.
+      security: [ { basicAuth: [] } ]
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TimestampServiceRequest' }
+      responses:
+        '200':
+          description: Timestamped container is ready.
+          content: { application/json: { schema: { $ref: '#/components/schemas/LtvServiceResult' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '413': { $ref: '#/components/responses/TooLarge' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+
+  /archive:
+    post:
+      tags: [LTV]
+      operationId: archiveDocument
+      summary: Upgrade a PAdES B-T signature to PAdES B-LT
+      description: |
+        Paid-tier, Basic-authenticated synchronous service. Fresh signer and TSA revocation evidence is
+        collected and embedded as DSS/VRI; the OCSP freshness hard rule applies. Already-valid B-LT is
+        returned unchanged. Emits exactly one `atk.archive` event and returns a one-off download token.
+      security: [ { basicAuth: [] } ]
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ArchiveServiceRequest' }
+      responses:
+        '200':
+          description: PAdES B-LT document is ready.
+          content: { application/json: { schema: { $ref: '#/components/schemas/LtvServiceResult' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '413': { $ref: '#/components/responses/TooLarge' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
+
+  /services/{requestId}/document:
+    get:
+      tags: [LTV]
+      operationId: downloadServiceDocument
+      summary: Download timestamp/archive output
+      security: [ { basicAuth: [] }, { downloadToken: [] } ]
+      parameters: [ { $ref: '#/components/parameters/RequestId' } ]
+      responses:
+        '200':
+          description: Transformed artifact bytes.
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /pairing/claim:
+    post:
+      tags: [Sign]
+      operationId: claimPairing
+      summary: Atomically claim an auth or sign NFC pairing
+      security: []
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/PairingClaimRequest' } } }
+      responses:
+        '200':
+          description: Request-scoped client token for the phone.
+          content: { application/json: { schema: { $ref: '#/components/schemas/PairingClaimResponse' } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+components:
+
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: Provider server-to-server credentials `keyId:keySecret` (+ IP allow-list). Mirrors the auth contract.
+    clientToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Short-lived per-request JWT with origin binding for browser clients. Mirrors the auth contract.
+    downloadToken:
+      type: apiKey
+      in: query
+      name: downloadToken
+      description: One-off token returned with a completed sign result, for fetching the signed document.
+
+  parameters:
+    RequestId:
+      name: requestId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: 1-255 visible characters; scoped to provider + service operation.
+      schema: { type: string, minLength: 1, maxLength: 255 }
+
+  schemas:
+
+    # --- sign-specific ---
+
+    Format:
+      type: string
+      enum: [pades, asice, adoc, raw]
+      description: |
+        pades = signed PDF; asice/adoc = XAdES-T containers; raw = a detached CAdES package from
+        a bare hash (no container returned). Container formats require `document` or `documentRef`.
+
+    DocumentRef:
+      type: object
+      description: |
+        Backend-fetched document. Hard SSRF controls apply - HTTPS only, host allow-list, no
+        private/loopback/link-local, DNS-rebind protection, size cap enforced pre + mid stream, and the
+        fetched bytes are verified against `sha256`. `authorization` is used only for the fetch, never
+        logged or persisted.
+      required: [url, sha256, sizeBytes]
+      additionalProperties: false
+      properties:
+        url: { type: string, format: uri, pattern: '^https://' }
+        sha256: { type: string, pattern: '^[0-9a-fA-F]{64}$' }
+        sizeBytes: { type: integer, minimum: 1 }
+        authorization: { type: string, maxLength: 2048 }
+
+    SignRequestCreate:
+      description: ATK supports every listed format; Smart-ID/Mobile-ID support PAdES only.
+      oneOf:
+        - title: ATK raw detached CAdES
+          type: object
+          required: [format, method, hash, hashAlgOid]
+          additionalProperties: false
+          properties:
+            format: { const: raw }
+            method: { type: string, enum: [physical, nfc], example: physical }
+            hash: { type: string, format: byte }
+            hashAlgOid: { $ref: '#/components/schemas/HashAlgOid' }
+            filename: { type: string }
+            mimeType: { type: string }
+            message: { type: string }
+            externalId: { type: string }
+            webhookUrl: { type: string, format: uri }
+        - title: ATK PDF or container
+          type: object
+          required: [format, method]
+          additionalProperties: false
+          properties:
+            format: { enum: [pades, asice, adoc] }
+            method: { type: string, enum: [physical, nfc], example: physical }
+            document: { type: string, format: byte }
+            documentRef: { $ref: '#/components/schemas/DocumentRef' }
+            filename: { type: string }
+            mimeType: { type: string }
+            message: { type: string }
+            externalId: { type: string }
+            webhookUrl: { type: string, format: uri }
+          oneOf:
+            - required: [document]
+              properties: { document: {} }
+            - required: [documentRef]
+              properties: { documentRef: {} }
+        - title: Smart-ID PAdES
+          type: object
+          required: [format, method, personalCode]
+          additionalProperties: false
+          properties:
+            format: { type: string, const: pades }
+            method: { type: string, const: smart_id }
+            personalCode: { type: string, pattern: '^[0-9]{11}$', example: '39001010000' }
+            document: { type: string, format: byte }
+            documentRef: { $ref: '#/components/schemas/DocumentRef' }
+            filename: { type: string }
+            mimeType: { type: string }
+            message: { type: string }
+            externalId: { type: string }
+            webhookUrl: { type: string, format: uri }
+          oneOf:
+            - required: [document]
+              properties: { document: {} }
+            - required: [documentRef]
+              properties: { documentRef: {} }
+        - title: Mobile-ID PAdES
+          type: object
+          required: [format, method, personalCode, phoneNumber]
+          additionalProperties: false
+          properties:
+            format: { type: string, const: pades }
+            method: { type: string, const: mobile_id }
+            personalCode: { type: string, pattern: '^[0-9]{11}$', example: '39001010000' }
+            phoneNumber: { type: string, pattern: '^\+3706[0-9]{7}$', example: '+37061234567' }
+            document: { type: string, format: byte }
+            documentRef: { $ref: '#/components/schemas/DocumentRef' }
+            filename: { type: string }
+            mimeType: { type: string }
+            message: { type: string }
+            externalId: { type: string }
+            webhookUrl: { type: string, format: uri }
+          oneOf:
+            - required: [document]
+              properties: { document: {} }
+            - required: [documentRef]
+              properties: { documentRef: {} }
+
+    SignRequestCreated:
+      type: object
+      required: [requestId, method, verificationCode, status, expiresAt]
+      description: Physical requests return `clientToken`; NFC returns `pairing`; remote methods return neither.
+      properties:
+        requestId: { type: string, format: uuid }
+        method: { $ref: '#/components/schemas/Method' }
+        verificationCode:
+          type: string
+          description: NFC anti-relay code, or the user verification code for Smart-ID/Mobile-ID.
+        clientToken: { type: string }
+        status: { $ref: '#/components/schemas/Status' }
+        expiresAt: { type: string, format: date-time }
+        pairing:
+          allOf: [ { $ref: '#/components/schemas/PairingHint' } ]
+          description: Present only when method == nfc.
+
+    SignCertificateSubmit:
+      type: object
+      required: [certificate]
+      properties:
+        certificate: { type: string, format: byte, description: Base64 DER of the card's signing certificate. }
+
+    SignCertificateChallenge:
+      type: object
+      required: [requestId, dtbs, dtbsHashAlgOid, operationToken, cert, signing]
+      properties:
+        requestId: { type: string, format: uuid }
+        dtbs:
+          type: string
+          format: byte
+          description: Base64 of the exact digest the card signs (e.g. for PAdES, the curve-matched digest of the CAdES SignedAttributes).
+        dtbsHashAlgOid: { $ref: '#/components/schemas/HashAlgOid' }
+        operationToken: { type: string }
+        verificationCode: { type: string }
+        cert:
+          type: object
+          properties:
+            subject: { $ref: '#/components/schemas/CertSubject' }
+        signing:
+          type: object
+          properties:
+            format: { $ref: '#/components/schemas/Format' }
+            signatureEncodingHints:
+              type: string
+              description: Optional hint for how the card signature should be encoded before submission (P1363 vs DER).
+
+    SignCompleteSubmit:
+      type: object
+      required: [signature, signatureAlgorithm, operationToken]
+      properties:
+        signature: { type: string, format: byte, description: Base64 raw card signature over `dtbs` (QES key). }
+        signatureAlgorithm: { $ref: '#/components/schemas/SignatureAlgorithm' }
+        signatureEncoding: { $ref: '#/components/schemas/SignatureEncoding' }
+        operationToken: { type: string }
+
+    Validation:
+      type: object
+      description: The advisory validation axis. Independent of `status`. See the two-axes note.
+      required: [status]
+      properties:
+        status: { type: string, enum: [pending, passed, failed, notApplicable] }
+        level:
+          type: string
+          description: e.g. QUALIFIED_VALID, VALID_NOT_QUALIFIED, INDETERMINATE.
+        report: { type: string, description: Optional pointer/id to the stored validation report. }
+
+    ValidationServiceRequest:
+      type: object
+      required: [format]
+      additionalProperties: false
+      oneOf:
+        - required: [document]
+          properties: { document: {}, documentRef: {} }
+          not:
+            required: [documentRef]
+            properties: { documentRef: {} }
+        - required: [documentRef]
+          properties: { documentRef: {}, document: {} }
+          not:
+            required: [document]
+            properties: { document: {} }
+      properties:
+        format: { type: string, enum: [pades, asice, adoc] }
+        filename: { type: string }
+        mimeType: { type: string }
+        document: { type: string, format: byte }
+        documentRef: { $ref: '#/components/schemas/DocumentRef' }
+        policy: { type: string, enum: [qes, aes], default: qes }
+
+    TimestampServiceRequest:
+      type: object
+      required: [format]
+      additionalProperties: false
+      oneOf:
+        - required: [document]
+          properties: { document: {}, documentRef: {} }
+          not:
+            required: [documentRef]
+            properties: { documentRef: {} }
+        - required: [documentRef]
+          properties: { documentRef: {}, document: {} }
+          not:
+            required: [document]
+            properties: { document: {} }
+      properties:
+        format: { type: string, enum: [asice, adoc] }
+        filename: { type: string }
+        mimeType: { type: string }
+        document: { type: string, format: byte }
+        documentRef: { $ref: '#/components/schemas/DocumentRef' }
+
+    ArchiveServiceRequest:
+      type: object
+      required: [format]
+      additionalProperties: false
+      oneOf:
+        - required: [document]
+          properties: { document: {}, documentRef: {} }
+          not:
+            required: [documentRef]
+            properties: { documentRef: {} }
+        - required: [documentRef]
+          properties: { documentRef: {}, document: {} }
+          not:
+            required: [document]
+            properties: { document: {} }
+      properties:
+        format: { type: string, const: pades }
+        filename: { type: string }
+        mimeType: { type: string }
+        document: { type: string, format: byte }
+        documentRef: { $ref: '#/components/schemas/DocumentRef' }
+
+    ValidationServiceResult:
+      type: object
+      required: [requestId, status, validation]
+      properties:
+        requestId: { type: string, format: uuid }
+        status: { type: string, const: done }
+        validation:
+          type: object
+          required: [status, level, policy, report]
+          properties:
+            status:
+              type: string
+              enum: [passed, failed, structural]
+              description: |
+                `passed`/`failed` come from SiVa (pades/asice). ADOC uses the internal
+                structural inspector and never returns `passed`; a structurally sound
+                container yields `structural`.
+            level: { type: string }
+            policy: { type: string, enum: [qes, aes] }
+            report: { type: object, additionalProperties: true }
+
+    LtvServiceResult:
+      type: object
+      required: [requestId, status, service, format, downloadToken]
+      properties:
+        requestId: { type: string, format: uuid }
+        status: { type: string, const: done }
+        service: { type: string, enum: [timestamp, archive] }
+        format: { type: string, enum: [pades, asice, adoc] }
+        timestampedSignatures: { type: integer, minimum: 0 }
+        archived: { type: boolean }
+        changed: { type: boolean }
+        level: { type: string }
+        signatureField: { type: string }
+        downloadToken: { type: string }
+
+    SignResult:
+      type: object
+      required: [status, method, validation, cert]
+      properties:
+        status: { type: string, const: done }
+        method: { $ref: '#/components/schemas/Method' }
+        validation: { $ref: '#/components/schemas/Validation' }
+        sig:
+          type: string
+          format: byte
+          description: For `format:"raw"`, the detached signature package. Absent for container formats (download the container instead).
+        sigAlgOid: { type: string }
+        cert:
+          type: object
+          properties:
+            subject: { $ref: '#/components/schemas/CertSubject' }
+        downloadToken: { type: string, description: 'One-off token for GET /sign/{id}/document.' }
+
+    SignRequestState:
+      type: object
+      required: [requestId, method, status]
+      properties:
+        requestId: { type: string, format: uuid }
+        method: { $ref: '#/components/schemas/Method' }
+        status: { $ref: '#/components/schemas/Status' }
+        verificationCode:
+          type: string
+          description: Present while a Smart-ID/Mobile-ID request is non-terminal.
+        validation: { $ref: '#/components/schemas/Validation' }
+        cert:
+          type: object
+          properties:
+            subject: { $ref: '#/components/schemas/CertSubject' }
+        sig: { type: string, format: byte }
+        sigAlgOid: { type: string }
+        downloadToken: { type: string }
+        error: { $ref: '#/components/schemas/ErrorBody' }
+
+    # --- shared primitives (mirror tvarka_atk_auth_api.openapi.yaml) ---
+
+    Method:
+      type: string
+      enum: [physical, nfc, smart_id, mobile_id]
+      example: physical
+      description: physical/NFC use card endpoints; smart_id/mobile_id complete server-side and support PAdES only.
+
+    Status:
+      type: string
+      description: |
+        Non-terminal - pending/awaitingCard/awaitingCredentials/finalizing. Terminal success - done.
+        Terminal failure - cancelled/timeout/deviceError/pinBlocked/cardRemoved/certInvalid.
+        Validation failure is on the `validation` axis, NOT here.
+      enum:
+        [pending, awaitingCard, awaitingCredentials, finalizing, done,
+         cancelled, timeout, deviceError, pinBlocked, cardRemoved, certInvalid]
+
+    HashAlgOid:
+      type: string
+      enum: ['2.16.840.1.101.3.4.2.1', '2.16.840.1.101.3.4.2.2']
+      description: SHA-256 / SHA-384 OID, curve-matched.
+
+    SignatureAlgorithm:
+      type: string
+      enum: [ES256, ES384]
+
+    SignatureEncoding:
+      type: string
+      enum: [P1363, DER]
+      default: P1363
+      description: >-
+        Informational - the server auto-detects and accepts either encoding regardless of this field.
+
+    CertSubject:
+      type: object
+      properties:
+        serialNumber: { type: string, example: 'PNOLT-39001010000' }
+        givenName: { type: string }
+        sn: { type: string }
+        cn: { type: string }
+        c: { type: string, example: LT }
+
+    PairingHint:
+      type: object
+      properties:
+        pairingUrl: { type: string, format: uri, example: 'https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN' }
+        deepLink: { type: string, example: 'tvarkasign://atk/pair/PAIRING_TOKEN' }
+        qrPayload: { type: string, example: 'https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN' }
+
+    PairingInfo:
+      allOf:
+        - $ref: '#/components/schemas/PairingHint'
+        - type: object
+          required: [pairingToken, expiresAt]
+          properties:
+            pairingToken: { type: string }
+            expiresAt: { type: string, format: date-time }
+
+    PairingClaimRequest:
+      type: object
+      required: [pairingToken]
+      properties:
+        pairingToken: { type: string, minLength: 32, maxLength: 200 }
+        claimNonce: { type: string, maxLength: 120 }
+        device:
+          type: object
+          additionalProperties: false
+          properties:
+            platform: { type: string, maxLength: 40 }
+            appVersion: { type: string, maxLength: 40 }
+            deviceName: { type: string, maxLength: 120 }
+
+    PairingClaimResponse:
+      type: object
+      required: [requestId, purpose, clientToken, status, expiresAt, verificationCode, summary]
+      properties:
+        requestId: { type: string, format: uuid }
+        purpose: { type: string, enum: [auth, sign] }
+        clientToken: { type: string }
+        status: { $ref: '#/components/schemas/Status' }
+        expiresAt: { type: string, format: date-time }
+        verificationCode: { type: string }
+        summary: { type: object, additionalProperties: true }
+
+    ErrorCode:
+      type: string
+      description: |
+        The full stable error-code catalog of the ATK API family (auth + sign + services);
+        each endpoint returns the subset that applies to it. By HTTP status:
+        400 invalid_json, missing_field, invalid_field, invalid_webhook_url, invalid_document_ref.
+        401 invalid_basic_credentials, invalid_client_token, client_token_expired,
+        operation_token_expired, invalid_download_token.
+        403 origin_not_allowed, ip_not_allowed, format_not_allowed, document_ref_host_not_allowed,
+        method_not_allowed, tenant_suspended, tier_forbidden.
+        404 request_not_found, pairing_not_found, document_not_ready.
+        409 request_terminal, operation_token_spent, identity_swap, idempotency_conflict,
+        service_in_progress, pairing_not_available, pairing_already_claimed.
+        410 pairing_expired. 413 document_too_large.
+        422 cert_invalid, untrusted_chain, cert_revoked, cert_expired, not_qualified,
+        cert_purpose_mismatch, signature_invalid, document_hash_mismatch, document_size_mismatch.
+        429 rate_limited. 500 assembly_failed. 502 document_ref_fetch_failed.
+        503 erasure_failed, pairing_service_unavailable, service_unavailable.
+        The catalog can grow in minor versions - fall back to HTTP status semantics
+        for codes you do not recognize.
+      enum:
+        - invalid_json
+        - missing_field
+        - invalid_field
+        - invalid_webhook_url
+        - invalid_document_ref
+        - invalid_basic_credentials
+        - invalid_client_token
+        - client_token_expired
+        - operation_token_expired
+        - invalid_download_token
+        - origin_not_allowed
+        - ip_not_allowed
+        - format_not_allowed
+        - document_ref_host_not_allowed
+        - method_not_allowed
+        - tenant_suspended
+        - tier_forbidden
+        - request_not_found
+        - pairing_not_found
+        - document_not_ready
+        - request_terminal
+        - operation_token_spent
+        - identity_swap
+        - idempotency_conflict
+        - service_in_progress
+        - pairing_not_available
+        - pairing_already_claimed
+        - pairing_expired
+        - document_too_large
+        - cert_invalid
+        - untrusted_chain
+        - cert_revoked
+        - cert_expired
+        - not_qualified
+        - cert_purpose_mismatch
+        - signature_invalid
+        - document_hash_mismatch
+        - document_size_mismatch
+        - rate_limited
+        - assembly_failed
+        - document_ref_fetch_failed
+        - erasure_failed
+        - pairing_service_unavailable
+        - service_unavailable
+
+    ErrorBody:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+          description: |
+            Stable machine code. documentRef failures use `invalid_document_ref`,
+            `document_ref_host_not_allowed`, `document_ref_fetch_failed`,
+            `document_size_mismatch`, `document_hash_mismatch`, or `document_too_large`.
+        message: { type: string }
+        requestId: { type: string, format: uuid }
+        retryable: { type: boolean }
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: { $ref: '#/components/schemas/ErrorBody' }
+
+  responses:
+    BadRequest:
+      description: Malformed input (e.g. container format without document, hash without raw).
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Unauthorized:
+      description: Missing/invalid credentials or client token.
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Forbidden:
+      description: Format not allowed / origin not allowed / tenant suspended.
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    NotFound:
+      description: Unknown request.
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Conflict:
+      description: Spent operation token, identity swap, terminal request, or idempotency conflict/in-progress operation.
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Unprocessable:
+      description: Cert purpose/chain/revocation/qualified reject, dtbs mismatch, bad signature, doc hash mismatch.
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    TooLarge:
+      description: Document exceeds the tenant's max size.
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    RateLimited:
+      description: Too many requests.
+      headers: { Retry-After: { schema: { type: integer } } }
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    ServiceUnavailable:
+      description: Validation/TSA/revocation dependency failed transiently; retry with the same Idempotency-Key.
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }

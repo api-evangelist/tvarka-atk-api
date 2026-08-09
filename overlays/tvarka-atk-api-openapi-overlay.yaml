@@ -1,0 +1,71 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for the Tvarka ATK API
+  version: 1.0.0
+extends: openapi/tvarka-atk-api-openapi-original.json
+x-provenance:
+  generated: '2026-08-09'
+  method: generated
+  source: openapi/tvarka-atk-api-openapi-original.json
+  note: >-
+    Non-destructive enhancements over the provider's published contract. Every action below is
+    either a pointer to an artifact in this repo or a correction of an observed contract defect;
+    none of it changes the provider's semantics.
+actions:
+  - target: $.info
+    description: Link the harvested API Evangelist artifact set from the contract itself.
+    update:
+      x-apievangelist-artifacts:
+        conventions: conventions/tvarka-atk-api-conventions.yml
+        errors: errors/tvarka-atk-api-problem-types.yml
+        authentication: authentication/tvarka-atk-api-authentication.yml
+        lifecycle: lifecycle/tvarka-atk-api-lifecycle.yml
+        sandbox: sandbox/tvarka-atk-api-sandbox.yml
+        webhooks: asyncapi/tvarka-atk-api-webhooks.yml
+        data_model: data-model/tvarka-atk-api-data-model.yml
+        conformance: conformance/tvarka-atk-api-conformance.yml
+        agentic_access: agentic-access/tvarka-atk-api-agentic-access.yml
+        skills: skills/_index.yml
+  - target: $.tags
+    description: >-
+      Declare the Erasure tag. Seven operations (deleteAuthRequest, deleteSignRequest, bulkErasure)
+      carry tags "Erasure" but the document-level tags[] array declares only Auth, Pairing,
+      Well-known, Sign, Validation and LTV, so Erasure renders as an undeclared tag.
+    update:
+      - name: Erasure
+        description: >-
+          GDPR erasure operations - erase one request on demand or bulk-erase the provider's
+          terminal requests ahead of the 30-day default retention window.
+  - target: $.info
+    description: Record the published commercial and operational envelope that the contract omits.
+    update:
+      x-apievangelist-operational:
+        status_page: https://atk.tvarka.pro/status/
+        status_json: https://atk.tvarka.pro/status.json
+        incident_feed: https://atk.tvarka.pro/status/feed.xml
+        health_probe: https://atk.tvarka.pro/health/
+        pricing: https://atk.tvarka.pro/docs/pricing/
+        max_document_size: 15 MiB
+        retention_default_days: 30
+  - target: $.components.parameters.SignIdempotencyKey
+    description: >-
+      Flag that this is the IETF idempotency-key header shape, so agent tooling can recognise it
+      without name matching.
+    update:
+      x-idempotency:
+        standard: draft-ietf-httpapi-idempotency-key-header
+        conflict_code: idempotency_conflict
+        conflict_status: 409
+        billing: An idempotent retry does not create a second usage event.
+  - target: $.webhooks.signStatus.post
+    description: Make the webhook verification contract machine-readable.
+    update:
+      x-webhook-security:
+        signature_header: X-Atk-Signature
+        signature_format: sha256=HMAC-SHA256(secret, raw-body)
+        idempotency_header: X-Atk-Idempotency-Key
+        delivery: at-least-once
+        consumer_rules:
+          - Verify the MAC over the raw body before parsing.
+          - Reject stale timestamps.
+          - Deduplicate by the idempotency key.

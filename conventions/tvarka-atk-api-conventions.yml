@@ -1,0 +1,144 @@
+generated: '2026-08-09'
+method: searched
+source: https://atk.tvarka.pro/docs/
+sources:
+  - https://atk.tvarka.pro/docs/quickstart/
+  - https://atk.tvarka.pro/docs/lifecycle/
+  - openapi/tvarka-atk-api-openapi-original.json
+summary: >-
+  A ceremony-shaped API: the provider backend creates an audience-bound request with HTTP Basic,
+  the card-driving client finishes it with a request-scoped JWT, and the result is retrieved by
+  polling or an HMAC-signed webhook. Idempotency is mandatory on the stateless trust services;
+  everything else is naturally idempotent through the request identifier.
+
+authentication:
+  style: layered
+  server_to_server:
+    scheme: http-basic
+    credential: keyId:keySecret
+    additional_control: provider server IP allow-list
+    note: Never placed in a browser or mobile client.
+  client:
+    scheme: http-bearer
+    format: JWT (ES256)
+    name: clientToken
+    minted: at request creation
+    claims: [tenant, requestId, purpose, method, allowedOrigins]
+    origin_enforcement: >-
+      For browser clients the API enforces the Origin header against allowedOrigins and rejects
+      cross-origin replay.
+    capability_limits: >-
+      Cannot create requests, read tenant data, or touch another request.
+  download:
+    scheme: apiKey
+    in: query
+    name: downloadToken
+    note: One-off token returned with a completed result, for fetching the produced document.
+  detail: authentication/tvarka-atk-api-authentication.yml
+
+idempotency:
+  supported: true
+  header: Idempotency-Key
+  required: true
+  applies_to:
+    - validateDocument
+    - timestampDocument
+    - archiveDocument
+  format: 1-255 visible characters
+  scope: provider + service operation
+  conflict_behavior: >-
+    A replayed key with a different payload returns HTTP 409 with error code idempotency_conflict.
+  billing_effect: >-
+    Idempotent service retries do not create a second usage event (published on the pricing page).
+  request_level_idempotency: >-
+    Auth and sign ceremonies are keyed by the server-issued requestId; re-submitting a terminal
+    request returns 409 request_terminal rather than starting a second ceremony.
+  webhook_idempotency:
+    header: X-Atk-Idempotency-Key
+    delivery: at-least-once
+    guidance: Deduplicate webhook deliveries by the idempotency key.
+
+pagination:
+  supported: false
+  note: >-
+    No collection-listing operations exist in the 1.3.0 contract; every read is a single-resource
+    fetch by requestId, so no pagination convention is published.
+
+versioning:
+  scheme: uri-path
+  current: v1
+  contract_version: 1.3.0
+  base_path: /v1
+  policy_url: https://atk.tvarka.pro/docs/lifecycle/
+  compatibility: >-
+    Additive fields, methods and operations may be introduced within /v1. Clients must ignore
+    response fields they do not use. A breaking request or response change requires a new major
+    resource family. No /v1 retirement is scheduled.
+  detail: lifecycle/tvarka-atk-api-lifecycle.yml
+
+error_envelope:
+  format: custom-json
+  media_type: application/json
+  rfc9457: false
+  fields:
+    - {name: code, type: string, required: true, note: stable machine code from a published enum}
+    - {name: message, type: string, required: true}
+    - {name: requestId, type: string, format: uuid, required: false}
+    - {name: retryable, type: boolean, required: false}
+  forward_compatibility: >-
+    The code catalog can grow in minor versions; clients must fall back to HTTP status semantics for
+    codes they do not recognize.
+  detail: errors/tvarka-atk-api-problem-types.yml
+
+rate_limiting:
+  signal: HTTP 429 with error code rate_limited
+  retry_header: Retry-After
+  retry_header_unit: seconds
+  published_quotas: false
+  detail: rate-limits/tvarka-atk-api-rate-limits.yml
+
+async_delivery:
+  polling:
+    operations: [getAuthRequest, getSignRequest]
+    terminal_field: status
+  webhooks:
+    event: signStatus
+    trigger: terminal status and every validation.status change
+    signature_header: X-Atk-Signature
+    signature_algorithm: sha256=HMAC-SHA256(secret, raw-body)
+    idempotency_header: X-Atk-Idempotency-Key
+    timestamp_header: true
+    delivery: at-least-once
+    guidance: Verify the MAC, reject stale timestamps, deduplicate by idempotency key.
+    detail: asyncapi/tvarka-atk-api-webhooks.yml
+
+request_tracing:
+  request_id_field: requestId
+  note: >-
+    requestId is a first-class resource identifier returned on creation and echoed on error bodies;
+    there is no separate correlation header documented.
+
+limits:
+  max_document_size: 15 MiB per provider unless contracted otherwise
+  oversize_response: 413 document_too_large
+
+data_handling:
+  retention_default_days: 30
+  retention_note: >-
+    Configurable down by contract. After the window the retention job removes document/result bytes,
+    certificates, derived identity data, filenames, messages and per-request callback details. A
+    pseudonymous certificate fingerprint and the minimal usage/audit row remain for replay
+    prevention, abuse investigation and billing integrity.
+  on_demand_erasure:
+    per_request: [deleteAuthRequest, deleteSignRequest]
+    bulk: bulkErasure
+  plaintext_exclusions: >-
+    Remote personal code and phone number are not stored as plaintext request fields.
+
+verification:
+  self_verifiable: true
+  note: >-
+    The caller re-derives the atk-auth-v1 challenge from its own audience plus the returned nonce and
+    verifies the card signature against the returned certificate; the optional assertion JWT can be
+    verified against the published JWKS. The integrator does not have to trust the provider's word.
+  jwks: well-known/tvarka-atk-api-atk-jwks.json

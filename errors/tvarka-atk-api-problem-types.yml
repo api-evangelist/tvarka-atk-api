@@ -1,0 +1,309 @@
+generated: '2026-08-09'
+method: derived
+source: openapi/tvarka-atk-api-openapi-original.json
+docs: https://atk.tvarka.pro/docs/api/
+format: custom-json
+rfc9457: false
+envelope:
+  media_type: application/json
+  schema: '#/components/schemas/AuthError (SignError is the identical shape)'
+  fields:
+  - name: code
+    type: string
+    required: true
+    note: stable machine code from the published enum below
+  - name: message
+    type: string
+    required: true
+  - name: requestId
+    type: string
+    format: uuid
+    required: false
+  - name: retryable
+    type: boolean
+    required: false
+    note: provider-set hint; the value below is the derived expectation from HTTP semantics
+forward_compatibility: The catalog can grow in minor versions - clients must fall back to HTTP status
+  semantics for codes they do not recognize (stated verbatim in the AuthErrorCode/SignErrorCode schema
+  description).
+statuses:
+- status: 400
+  description: Malformed input.
+  codes:
+  - invalid_json
+  - missing_field
+  - invalid_field
+  - invalid_webhook_url
+  - invalid_document_ref
+- status: 401
+  description: Missing/invalid credentials or client token.
+  codes:
+  - invalid_basic_credentials
+  - invalid_client_token
+  - client_token_expired
+  - operation_token_expired
+  - invalid_download_token
+- status: 403
+  description: Authorized but not permitted (origin/format/tenant).
+  codes:
+  - origin_not_allowed
+  - ip_not_allowed
+  - format_not_allowed
+  - document_ref_host_not_allowed
+  - method_not_allowed
+  - tenant_suspended
+  - tier_forbidden
+- status: 404
+  description: Unknown request.
+  codes:
+  - request_not_found
+  - pairing_not_found
+  - document_not_ready
+- status: 409
+  description: State/idempotency conflict (spent operation token, identity swap, terminal request, in-progress
+    service operation).
+  codes:
+  - request_terminal
+  - operation_token_spent
+  - identity_swap
+  - idempotency_conflict
+  - service_in_progress
+  - pairing_not_available
+  - pairing_already_claimed
+- status: 410
+  description: Pairing token expired.
+  codes:
+  - pairing_expired
+- status: 413
+  description: Document exceeds the tenant's max size.
+  codes:
+  - document_too_large
+- status: 422
+  description: Semantic reject (cert purpose/chain/revocation/qualified, dtbs mismatch, bad signature,
+    document hash mismatch).
+  codes:
+  - cert_invalid
+  - untrusted_chain
+  - cert_revoked
+  - cert_expired
+  - not_qualified
+  - cert_purpose_mismatch
+  - signature_invalid
+  - document_hash_mismatch
+  - document_size_mismatch
+- status: 429
+  description: Too many requests.
+  codes:
+  - rate_limited
+- status: 500
+  description: Container assembly failed.
+  codes:
+  - assembly_failed
+- status: 502
+  description: Upstream document fetch failed.
+  codes:
+  - document_ref_fetch_failed
+- status: 503
+  description: A required remote, erasure, validation, TSA or revocation dependency is temporarily unavailable.
+  codes:
+  - erasure_failed
+  - pairing_service_unavailable
+  - service_unavailable
+problems:
+- code: invalid_json
+  status: 400
+  title: Malformed input.
+  retryable: false
+- code: missing_field
+  status: 400
+  title: Malformed input.
+  retryable: false
+- code: invalid_field
+  status: 400
+  title: Malformed input.
+  retryable: false
+- code: invalid_webhook_url
+  status: 400
+  title: Malformed input.
+  retryable: false
+- code: invalid_document_ref
+  status: 400
+  title: Malformed input.
+  retryable: false
+- code: invalid_basic_credentials
+  status: 401
+  title: Missing/invalid credentials or client token.
+  retryable: false
+- code: invalid_client_token
+  status: 401
+  title: Missing/invalid credentials or client token.
+  retryable: false
+- code: client_token_expired
+  status: 401
+  title: Missing/invalid credentials or client token.
+  retryable: false
+- code: operation_token_expired
+  status: 401
+  title: Missing/invalid credentials or client token.
+  retryable: false
+- code: invalid_download_token
+  status: 401
+  title: Missing/invalid credentials or client token.
+  retryable: false
+- code: origin_not_allowed
+  status: 403
+  title: Authorized but not permitted (origin/format/tenant).
+  retryable: false
+- code: ip_not_allowed
+  status: 403
+  title: Authorized but not permitted (origin/format/tenant).
+  retryable: false
+- code: format_not_allowed
+  status: 403
+  title: Authorized but not permitted (origin/format/tenant).
+  retryable: false
+- code: document_ref_host_not_allowed
+  status: 403
+  title: Authorized but not permitted (origin/format/tenant).
+  retryable: false
+- code: method_not_allowed
+  status: 403
+  title: Authorized but not permitted (origin/format/tenant).
+  retryable: false
+- code: tenant_suspended
+  status: 403
+  title: Authorized but not permitted (origin/format/tenant).
+  retryable: false
+- code: tier_forbidden
+  status: 403
+  title: Authorized but not permitted (origin/format/tenant).
+  retryable: false
+- code: request_not_found
+  status: 404
+  title: Unknown request.
+  retryable: false
+- code: pairing_not_found
+  status: 404
+  title: Unknown request.
+  retryable: false
+- code: document_not_ready
+  status: 404
+  title: Unknown request.
+  retryable: false
+- code: request_terminal
+  status: 409
+  title: State/idempotency conflict (spent operation token, identity swap, terminal request, in-progress
+    service operation).
+  retryable: false
+- code: operation_token_spent
+  status: 409
+  title: State/idempotency conflict (spent operation token, identity swap, terminal request, in-progress
+    service operation).
+  retryable: false
+- code: identity_swap
+  status: 409
+  title: State/idempotency conflict (spent operation token, identity swap, terminal request, in-progress
+    service operation).
+  retryable: false
+- code: idempotency_conflict
+  status: 409
+  title: State/idempotency conflict (spent operation token, identity swap, terminal request, in-progress
+    service operation).
+  retryable: false
+- code: service_in_progress
+  status: 409
+  title: State/idempotency conflict (spent operation token, identity swap, terminal request, in-progress
+    service operation).
+  retryable: false
+- code: pairing_not_available
+  status: 409
+  title: State/idempotency conflict (spent operation token, identity swap, terminal request, in-progress
+    service operation).
+  retryable: false
+- code: pairing_already_claimed
+  status: 409
+  title: State/idempotency conflict (spent operation token, identity swap, terminal request, in-progress
+    service operation).
+  retryable: false
+- code: pairing_expired
+  status: 410
+  title: Pairing token expired.
+  retryable: false
+- code: document_too_large
+  status: 413
+  title: Document exceeds the tenant's max size.
+  retryable: false
+- code: cert_invalid
+  status: 422
+  title: Semantic reject (cert purpose/chain/revocation/qualified, dtbs mismatch, bad signature, document
+    hash mismatch).
+  retryable: false
+- code: untrusted_chain
+  status: 422
+  title: Semantic reject (cert purpose/chain/revocation/qualified, dtbs mismatch, bad signature, document
+    hash mismatch).
+  retryable: false
+- code: cert_revoked
+  status: 422
+  title: Semantic reject (cert purpose/chain/revocation/qualified, dtbs mismatch, bad signature, document
+    hash mismatch).
+  retryable: false
+- code: cert_expired
+  status: 422
+  title: Semantic reject (cert purpose/chain/revocation/qualified, dtbs mismatch, bad signature, document
+    hash mismatch).
+  retryable: false
+- code: not_qualified
+  status: 422
+  title: Semantic reject (cert purpose/chain/revocation/qualified, dtbs mismatch, bad signature, document
+    hash mismatch).
+  retryable: false
+- code: cert_purpose_mismatch
+  status: 422
+  title: Semantic reject (cert purpose/chain/revocation/qualified, dtbs mismatch, bad signature, document
+    hash mismatch).
+  retryable: false
+- code: signature_invalid
+  status: 422
+  title: Semantic reject (cert purpose/chain/revocation/qualified, dtbs mismatch, bad signature, document
+    hash mismatch).
+  retryable: false
+- code: document_hash_mismatch
+  status: 422
+  title: Semantic reject (cert purpose/chain/revocation/qualified, dtbs mismatch, bad signature, document
+    hash mismatch).
+  retryable: false
+- code: document_size_mismatch
+  status: 422
+  title: Semantic reject (cert purpose/chain/revocation/qualified, dtbs mismatch, bad signature, document
+    hash mismatch).
+  retryable: false
+- code: rate_limited
+  status: 429
+  title: Too many requests.
+  retryable: true
+- code: assembly_failed
+  status: 500
+  title: Container assembly failed.
+  retryable: true
+- code: document_ref_fetch_failed
+  status: 502
+  title: Upstream document fetch failed.
+  retryable: true
+- code: erasure_failed
+  status: 503
+  title: A required remote, erasure, validation, TSA or revocation dependency is temporarily unavailable.
+  retryable: true
+- code: pairing_service_unavailable
+  status: 503
+  title: A required remote, erasure, validation, TSA or revocation dependency is temporarily unavailable.
+  retryable: true
+- code: service_unavailable
+  status: 503
+  title: A required remote, erasure, validation, TSA or revocation dependency is temporarily unavailable.
+  retryable: true
+coverage:
+  codes: 44
+  statuses: 12
+  note: One shared catalog across auth, sign and trust-service operations; each endpoint returns the subset
+    that applies to it.

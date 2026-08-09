@@ -1,0 +1,147 @@
+generated: '2026-08-09'
+method: derived
+source: openapi/tvarka-atk-api-openapi-original.json
+docs: https://atk.tvarka.pro/docs/quickstart/
+note: Examples published inside the provider OpenAPI, extracted verbatim, plus the one runnable request
+  the quickstart publishes. The OpenAPI additionally carries 18 schema-level property examples (see schema_examples).
+  Nothing here is invented.
+request_examples:
+- operationId: createAuthRequest
+  path: /auth/requests
+  method: POST
+  name: physicalAtk
+  summary: Primary ATK desktop-reader method
+  location: requestBody
+  value:
+    audience: https://app.example
+    method: physical
+- operationId: createAuthRequest
+  path: /auth/requests
+  method: POST
+  name: smartId
+  summary: Optional Smart-ID method
+  location: requestBody
+  value:
+    audience: https://app.example
+    method: smart_id
+    personalCode: '39001010000'
+- operationId: createAuthRequest
+  path: /auth/requests
+  method: POST
+  name: mobileId
+  summary: Optional Mobile-ID method
+  location: requestBody
+  value:
+    audience: https://app.example
+    method: mobile_id
+    personalCode: '39001010000'
+    phoneNumber: '+37061234567'
+- operationId: createSignRequest
+  path: /sign/requests
+  method: POST
+  name: physicalAtk
+  summary: Primary ATK PAdES method
+  location: requestBody
+  value:
+    format: pades
+    method: physical
+    document: JVBERi0xLjQK
+- operationId: createSignRequest
+  path: /sign/requests
+  method: POST
+  name: smartId
+  summary: Optional Smart-ID PAdES method
+  location: requestBody
+  value:
+    format: pades
+    method: smart_id
+    personalCode: '39001010000'
+    document: JVBERi0xLjQK
+- operationId: createSignRequest
+  path: /sign/requests
+  method: POST
+  name: mobileId
+  summary: Optional Mobile-ID PAdES method
+  location: requestBody
+  value:
+    format: pades
+    method: mobile_id
+    personalCode: '39001010000'
+    phoneNumber: '+37061234567'
+    document: JVBERi0xLjQK
+schema_examples:
+- schema: AuthMethod
+  property: null
+  value: physical
+- schema: AuthCertSubject
+  property: serialNumber
+  value: PNOLT-39001010000
+- schema: AuthCertSubject
+  property: c
+  value: LT
+- schema: AuthAuthRequestCreate
+  property: audience
+  value: https://www.epaslaugos.lt
+- schema: AuthAuthRequestCreate
+  property: personalCode
+  value: '39001010000'
+- schema: AuthAuthRequestCreate
+  property: phoneNumber
+  value: '+37061234567'
+- schema: AuthPairingHint
+  property: pairingUrl
+  value: https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN
+- schema: AuthPairingHint
+  property: deepLink
+  value: tvarkasign://atk/pair/PAIRING_TOKEN
+- schema: AuthPairingHint
+  property: qrPayload
+  value: https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN
+- schema: SignMethod
+  property: null
+  value: physical
+- schema: SignCertSubject
+  property: serialNumber
+  value: PNOLT-39001010000
+- schema: SignCertSubject
+  property: c
+  value: LT
+- schema: SignSignRequestCreate
+  property: method
+  value: physical
+- schema: SignSignRequestCreate
+  property: personalCode
+  value: '39001010000'
+- schema: SignSignRequestCreate
+  property: phoneNumber
+  value: '+37061234567'
+- schema: SignPairingHint
+  property: pairingUrl
+  value: https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN
+- schema: SignPairingHint
+  property: deepLink
+  value: tvarkasign://atk/pair/PAIRING_TOKEN
+- schema: SignPairingHint
+  property: qrPayload
+  value: https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN
+code_samples:
+- source: https://atk.tvarka.pro/docs/quickstart/
+  language: shell
+  operationId: createAuthRequest
+  code: "curl --user \"$ATK_KEY_ID:$ATK_KEY_SECRET\" \\\n  --header \"Content-Type: application/json\"\
+    \ \\\n  --data '{\"audience\":\"https://app.example.lt\",\"method\":\"physical\"}' \\\n  https://atk.tvarka.pro/v1/auth/requests"
+  expected: HTTP 202 with requestId, clientToken, verificationCode, status and expiresAt.
+postman:
+- name: Authentication collection
+  url: https://atk.tvarka.pro/postman/auth.json
+  note: Deterministically generated, with physical ATK, Smart-ID and Mobile-ID examples.
+- name: Signing and services collection
+  url: https://atk.tvarka.pro/postman/sign.json
+  note: Deterministically generated, with physical ATK, Smart-ID and Mobile-ID examples.
+warning: The personalCode 39001010000 and phoneNumber +37061234567 above are SCHEMA EXAMPLES in the provider
+  contract, not working sandbox fixtures. The only published test fixture is atk-test.pdf - see sandbox/tvarka-atk-api-sandbox.yml.
+coverage:
+  request_examples: 6
+  schema_examples: 18
+  code_samples: 1
+  postman_collections: 2

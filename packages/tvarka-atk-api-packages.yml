@@ -1,0 +1,59 @@
+generated: '2026-08-09'
+method: searched
+source: https://atk.tvarka.pro/docs/sdks/
+docs: https://atk.tvarka.pro/docs/sdks/
+manifest: https://atk.tvarka.pro/sdk/manifest.json
+distribution: >-
+  Tvarka does not publish to public package registries. Both SDKs ship as deterministic source
+  bundles downloaded from the API host, with the exact filename, version, byte size and SHA-256
+  digest published in a machine-readable manifest so CI can verify a download without scraping the
+  docs page. Probed 2026-08-09: npm registry search for "tvarka" returns no first-party package;
+  pypi.org/pypi/tvarka and pypi.org/pypi/tvarka-atk both 404.
+packages:
+  - language: python
+    registry: direct-download
+    name: tvarka-atk-python
+    version: 0.1.0
+    url: https://atk.tvarka.pro/sdk/python.zip
+    filename: tvarka-atk-python-0.1.0.zip
+    sha256: 28ae60db655c21584ad86be3ea3aa1d37fc61bf1a73e292a9f1794b11a61966d
+    size_bytes: 3920
+    install: curl -O https://atk.tvarka.pro/sdk/python.zip
+    official: true
+    scope: server
+    description: >-
+      Dependency-free Python 3.10+ server client covering request creation, polling, downloads,
+      erasure, validation, timestamp and archive. Holds the provider Basic credentials, so it is
+      server-only.
+  - language: javascript
+    registry: direct-download
+    name: tvarka-atk-web
+    version: 0.1.0
+    url: https://atk.tvarka.pro/sdk/web.zip
+    filename: tvarka-atk-web-0.1.0.zip
+    sha256: 093c9843299d07eb27cca9bff4910b14446e94994ff33c5276790f19f2357726
+    size_bytes: 2990
+    install: curl -O https://atk.tvarka.pro/sdk/web.zip
+    official: true
+    scope: browser-device
+    description: >-
+      Zero-dependency ESM package with TypeScript declarations. Accepts only request-scoped client
+      tokens and delegates card access to an integrator-owned CardDriver, so no provider secret ever
+      reaches the browser or device.
+registries_probed:
+  - {registry: npm, query: tvarka, result: no first-party package}
+  - {registry: pypi, query: tvarka, result: 404}
+  - {registry: pypi, query: tvarka-atk, result: 404}
+  - {registry: github, query: tvarka atk, result: no provider-owned repository}
+collections:
+  - type: postman
+    name: Authentication collection
+    url: https://atk.tvarka.pro/postman/auth.json
+    official: true
+  - type: postman
+    name: Signing and services collection
+    url: https://atk.tvarka.pro/postman/sign.json
+    official: true
+notes: >-
+  License is proprietary (https://tvarka.pro/salygos/); the docs state the SDK source packages are
+  proprietary integration materials and that the published OpenAPI contract remains authoritative.

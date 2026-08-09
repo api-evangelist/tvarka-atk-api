@@ -1,0 +1,22 @@
+generated: '2026-08-09'
+method: derived
+source: arazzo/*.yml
+workflows:
+  - file: tvarka-atk-api-authenticate-eid-card.yml
+    workflowId: authenticate-eid-card
+    title: Authenticate a person with a Lithuanian eID card
+    summary: >-
+      Create an audience-bound request on the backend, drive the card on the device, and verify the
+      returned identity against the published JWKS.
+  - file: tvarka-atk-api-sign-pades-document.yml
+    workflowId: sign-pades-document
+    title: Sign a PDF with a qualified electronic signature
+    summary: >-
+      The PAdES signing ceremony, including the check that most integrations miss - the advisory
+      validation axis, which is independent of request status.
+  - file: tvarka-atk-api-timestamp-and-archive.yml
+    workflowId: validate-timestamp-archive
+    title: Validate, timestamp and archive an existing signed document
+    summary: >-
+      The three stateless trust services in sequence, with the Idempotency-Key discipline the
+      provider requires on each.

@@ -1,11 +1,16 @@
 name: Tvarka ATK API
 description: >-
   A single REST API for Lithuanian eID authentication and qualified electronic signing (QES), plus validation,
-  timestamping and long-term-validation (LTV)/archive services. Primary ceremonies are physical smart-card reader and
-  NFC on the Lithuanian identity card (ATK); Smart-ID and Mobile-ID are optional server-side methods. eIDAS-aligned.
+  timestamping and long-term-validation (LTV)/archive trust services. The primary ceremonies read the Lithuanian
+  identity card (ATK) through a physical smart-card reader or an NFC phone tap, with Smart-ID and Mobile-ID as
+  optional server-side methods under the same request, polling, webhook and metering model. Signing produces PAdES,
+  ASiC-E, ADOC or detached CAdES artifacts with a qualified timestamp and an advisory validation axis. eIDAS-aligned
+  and EU-resident, operated from Lithuania by Advokato M. Kiskio kontora INVENT and Socialiniai algoritmai, UAB, and
+  priced per successful operation with no subscription or minimum.
+image: https://tvarka.pro/static/img/tvarka-logo-closer.53b2d1b2a9b0.svg
 url: https://tvarka-atk-api.apievangelist.com/apis.yml
 created: '2026-08-02'
-modified: '2026-08-02'
+modified: '2026-08-09'
 specificationVersion: '0.21'
 tags:
   - Authentication
@@ -22,12 +27,16 @@ tags:
   - LTV
   - Webhooks
   - Identity
+  - Trust Services
+  - GDPR
 apis:
   - name: Tvarka ATK API
     description: >-
       REST API for Lithuanian eID authentication and qualified electronic signing (QES), with validation, timestamping
-      and LTV/archive trust services. OpenAPI 3.1 contract with Auth, Sign, Pairing, Validation, LTV and Well-known
-      tags. Webhooks documented in OpenAPI webhooks block (signStatus event).
+      and LTV/archive trust services. OpenAPI 3.1 contract, version 1.3.0, 22 operations across Auth, Sign, Pairing,
+      Erasure, Validation, LTV and Well-known. Layered auth - HTTP Basic server-to-server behind an IP allow-list plus
+      a per-request ES256 client token for the card-driving device. Webhooks are declared natively in the OpenAPI
+      webhooks block (signStatus, HMAC-signed).
     humanURL: https://atk.tvarka.pro/docs/
     baseURL: https://atk.tvarka.pro/v1
     tags:
@@ -48,17 +57,126 @@ apis:
     properties:
       - type: OpenAPI
         url: https://atk.tvarka.pro/openapi.json
+      - type: OpenAPI
+        name: Canonical complete contract (harvested)
+        url: openapi/tvarka-atk-api-openapi-original.json
+      - type: OpenAPI
+        name: Authentication specialist contract (harvested)
+        url: openapi/tvarka-atk-api-auth-openapi.yaml
+      - type: OpenAPI
+        name: Signing and services specialist contract (harvested)
+        url: openapi/tvarka-atk-api-sign-openapi.yaml
       - type: PostmanCollection
+        name: Authentication collection
         url: https://atk.tvarka.pro/postman/auth.json
       - type: PostmanCollection
+        name: Signing and services collection
         url: https://atk.tvarka.pro/postman/sign.json
       - type: Documentation
         url: https://atk.tvarka.pro/docs/
+      - type: APIsJSON
+        name: Provider-published APIs.json catalog
+        url: https://atk.tvarka.pro/apis.json
 maintainers:
-  - FN: Tvarka ATK API team
+  - FN: Tvarka API team
+    email: info@tvarka.pro
+    organizationName: Tvarka
     url: https://tvarka.pro
 generated:
   by: apis.io/add
   model: claude-opus-4-8
   confidence: 95
   at: '2026-08-02T22:54:13.353Z'
+x-enrichment:
+  date: '2026-08-09'
+  status: enriched
+  artifacts_added: 36
+  pass: local-v1
+common:
+- type: AgenticAccess
+  url: agentic-access/tvarka-atk-api-agentic-access.yml
+- type: DomainSecurity
+  url: security/tvarka-atk-api-domain-security.yml
+- type: Authentication
+  url: authentication/tvarka-atk-api-authentication.yml
+- type: DeveloperPortal
+  url: https://atk.tvarka.pro/docs/
+- type: Documentation
+  url: https://atk.tvarka.pro/docs/
+- type: APIReference
+  url: https://atk.tvarka.pro/docs/api/
+- type: GettingStarted
+  url: https://atk.tvarka.pro/docs/quickstart/
+- type: Support
+  url: https://tvarka.pro/kontaktai/
+- type: SignUp
+  url: https://atk.tvarka.pro/docs/access/
+- type: Pricing
+  url: https://atk.tvarka.pro/docs/pricing/
+- type: TermsOfService
+  url: https://tvarka.pro/salygos/
+- type: PrivacyPolicy
+  url: https://tvarka.pro/privatumas/
+- type: Postman
+  name: Authentication collection
+  url: https://atk.tvarka.pro/postman/auth.json
+- type: Postman
+  name: Signing and services collection
+  url: https://atk.tvarka.pro/postman/sign.json
+- type: Packages
+  url: packages/tvarka-atk-api-packages.yml
+- type: SDKs
+  url: packages/tvarka-atk-api-packages.yml
+- type: WellKnown
+  url: well-known/tvarka-atk-api-well-known.yml
+- type: LLMsTxt
+  url: llms/tvarka-atk-api-llms.txt
+- type: MCPServer
+  url: mcp/tvarka-atk-api-mcp.yml
+- type: Overlay
+  url: overlays/tvarka-atk-api-openapi-overlay.yaml
+- type: Conformance
+  url: conformance/tvarka-atk-api-conformance.yml
+- type: Compliance
+  url: https://tvarka.pro/saugumas/
+- type: ErrorCatalog
+  url: errors/tvarka-atk-api-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/tvarka-atk-api-lifecycle.yml
+- type: StatusPage
+  url: https://atk.tvarka.pro/status/
+- type: Deprecation
+  url: https://atk.tvarka.pro/docs/lifecycle/
+- type: ChangeLog
+  url: changelog/tvarka-atk-api-changelog.yml
+- type: Security
+  url: https://tvarka.pro/saugumas/
+- type: VulnerabilityDisclosure
+  url: security/tvarka-atk-api-vulnerability-disclosure.yml
+- type: Sandbox
+  url: sandbox/tvarka-atk-api-sandbox.yml
+- type: Conventions
+  url: conventions/tvarka-atk-api-conventions.yml
+- type: Idempotency
+  url: conventions/tvarka-atk-api-conventions.yml
+- type: Webhooks
+  url: asyncapi/tvarka-atk-api-webhooks.yml
+- type: DataModel
+  url: data-model/tvarka-atk-api-data-model.yml
+- type: Examples
+  url: examples/tvarka-atk-api-examples.yml
+- type: RateLimits
+  url: rate-limits/tvarka-atk-api-rate-limits.yml
+- type: Plans
+  url: plans/tvarka-atk-api-plans.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Arazzo
+  name: Authenticate a person with a Lithuanian eID card
+  url: arazzo/tvarka-atk-api-authenticate-eid-card.yml
+- type: Arazzo
+  name: Sign a PDF with a qualified electronic signature
+  url: arazzo/tvarka-atk-api-sign-pades-document.yml
+- type: Arazzo
+  name: Validate, timestamp and archive an existing signed document
+  url: arazzo/tvarka-atk-api-timestamp-and-archive.yml

@@ -1,0 +1,52 @@
+generated: '2026-08-09'
+method: searched
+source: https://atk.tvarka.pro/docs/pricing/
+url: https://atk.tvarka.pro/docs/pricing/
+model: pay-per-successful-operation
+currency: EUR
+tax_note: Prices exclude VAT; Lithuanian VAT is added where applicable.
+plans:
+  - name: Sandbox
+    price: 0
+    unit: per operation
+    billable: false
+    access: Issued after a short manual review at https://atk.tvarka.pro/docs/access/
+    description: >-
+      Zero-rated sandbox provider on the same host as production. Synthetic/test material only;
+      sandbox operations are never billed.
+  - name: Production - native ATK
+    price: 0.07
+    unit: per successful operation
+    description: >-
+      Native ATK authentication or signing over a physical reader or NFC.
+  - name: Production - trust services
+    price: 0.07
+    unit: per successful operation
+    description: Validation, timestamp or archive service call.
+  - name: Production - Smart-ID
+    price: 0.08
+    unit: per successful operation
+    description: Smart-ID authentication or PAdES signing.
+  - name: Production - Mobile-ID
+    price: 0.08
+    unit: per successful operation
+    description: Mobile-ID authentication or PAdES signing.
+plan_count: 5
+metering:
+  - operation: Authentication
+    billable_point: A verified identity reaches status "done".
+  - operation: Qualified signing
+    billable_point: The signed artifact is assembled and the signer signature is verified.
+  - operation: Validation, timestamp, archive
+    billable_point: The idempotent service call completes successfully.
+rules:
+  - No charge for failed, cancelled or expired ceremonies.
+  - No charge for sandbox operations.
+  - Idempotent service retries do not create a second usage event.
+  - Later rate changes do not reprice completed operations.
+  - No progressive volume bands and no fractional-cent month-end allocation.
+  - The whole-cent rate in effect when an operation completes is snapshotted into the immutable usage record and monthly statement.
+  - No subscription, monthly minimum or retrospective repricing.
+enterprise: >-
+  An enterprise order may agree another whole-cent rate for later operations. Production onboarding
+  confirms the enabled methods and their rates before credentials are activated.
