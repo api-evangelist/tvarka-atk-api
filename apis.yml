@@ -8,7 +8,7 @@ description: >-
   and EU-resident, operated from Lithuania by Advokato M. Kiskio kontora INVENT and Socialiniai algoritmai, UAB, and
   priced per successful operation with no subscription or minimum.
 image: https://tvarka.pro/static/img/tvarka-logo-closer.53b2d1b2a9b0.svg
-url: https://tvarka-atk-api.apievangelist.com/apis.yml
+url: https://raw.githubusercontent.com/api-evangelist/tvarka-atk-api/refs/heads/main/apis.yml
 created: '2026-08-02'
 modified: '2026-08-09'
 specificationVersion: '0.21'
