@@ -115,3 +115,9 @@ tools:
   description: Download timestamp/archive output
   source_operation: openapi/tvarka-atk-api-openapi-original.json#downloadServiceDocument
   http: GET /services/{requestId}/document
+deployment:
+  mode: none
+  verified: derived
+  tools: 22
+  checked: '2026-08-12'
+  source: catalog MCP census

@@ -1,0 +1,196 @@
+openapi: 3.2.0
+info:
+  title: Tvarka Atk Well Known API
+  version: 1.3.0
+  description: 'Operations tagged Well-known across 2 of this provider''s published API definitions: tvarka-atk-api-auth-openapi.yaml, tvarka-atk-api-openapi-original.json. Each path carries the servers of the definition it was published in.'
+servers:
+- url: https://atk.tvarka.pro/v1
+  description: 'Production. Sandbox runs on the same host - provider credentials issued with
+
+    environment=sandbox get the identical API against test-card material and are never billed.
+
+    '
+security:
+- basicAuth: []
+tags:
+- name: Well-known
+  description: Keys for verifying the optional `assertion` JWT.
+paths:
+  /.well-known/atk-jwks.json:
+    servers:
+    - url: https://atk.tvarka.pro
+      description: Host root - the JWKS lives outside the /v1 base path.
+    get:
+      tags:
+      - Well-known
+      operationId: getJwks
+      summary: JWKS for verifying the optional `assertion` JWT
+      description: 'Public keys (by `kid`) for the ES256 signer. Rotation keeps current + previous keys published so
+
+        in-flight assertions verify.
+
+        '
+      security: []
+      responses:
+        '200':
+          description: Key set.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Jwks'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  responses:
+    NotFound:
+      description: Unknown request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    ErrorBody:
+      type: object
+      required:
+      - code
+      - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        message:
+          type: string
+        requestId:
+          type: string
+          format: uuid
+        retryable:
+          type: boolean
+    Error:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorBody'
+    Jwks:
+      type: object
+      properties:
+        keys:
+          type: array
+          items:
+            type: object
+            description: A JWK (EC P-256, `kid`, `use:sig`, `alg:ES256`).
+    ErrorCode:
+      type: string
+      description: 'The full stable error-code catalog of the ATK API family (auth + sign + services);
+
+        each endpoint returns the subset that applies to it. By HTTP status:
+
+        400 invalid_json, missing_field, invalid_field, invalid_webhook_url, invalid_document_ref.
+
+        401 invalid_basic_credentials, invalid_client_token, client_token_expired,
+
+        operation_token_expired, invalid_download_token.
+
+        403 origin_not_allowed, ip_not_allowed, format_not_allowed, document_ref_host_not_allowed,
+
+        method_not_allowed, tenant_suspended, tier_forbidden.
+
+        404 request_not_found, pairing_not_found, document_not_ready.
+
+        409 request_terminal, operation_token_spent, identity_swap, idempotency_conflict,
+
+        service_in_progress, pairing_not_available, pairing_already_claimed.
+
+        410 pairing_expired. 413 document_too_large.
+
+        422 cert_invalid, untrusted_chain, cert_revoked, cert_expired, not_qualified,
+
+        cert_purpose_mismatch, signature_invalid, document_hash_mismatch, document_size_mismatch.
+
+        429 rate_limited. 500 assembly_failed. 502 document_ref_fetch_failed.
+
+        503 erasure_failed, pairing_service_unavailable, service_unavailable.
+
+        The catalog can grow in minor versions - fall back to HTTP status semantics
+
+        for codes you do not recognize.
+
+        '
+      enum:
+      - invalid_json
+      - missing_field
+      - invalid_field
+      - invalid_webhook_url
+      - invalid_document_ref
+      - invalid_basic_credentials
+      - invalid_client_token
+      - client_token_expired
+      - operation_token_expired
+      - invalid_download_token
+      - origin_not_allowed
+      - ip_not_allowed
+      - format_not_allowed
+      - document_ref_host_not_allowed
+      - method_not_allowed
+      - tenant_suspended
+      - tier_forbidden
+      - request_not_found
+      - pairing_not_found
+      - document_not_ready
+      - request_terminal
+      - operation_token_spent
+      - identity_swap
+      - idempotency_conflict
+      - service_in_progress
+      - pairing_not_available
+      - pairing_already_claimed
+      - pairing_expired
+      - document_too_large
+      - cert_invalid
+      - untrusted_chain
+      - cert_revoked
+      - cert_expired
+      - not_qualified
+      - cert_purpose_mismatch
+      - signature_invalid
+      - document_hash_mismatch
+      - document_size_mismatch
+      - rate_limited
+      - assembly_failed
+      - document_ref_fetch_failed
+      - erasure_failed
+      - pairing_service_unavailable
+      - service_unavailable
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: 'Provider server-to-server credentials `keyId:keySecret`. Server-to-server only, also gated by the
+
+        provider''s server IP allow-list. Never placed in a browser/mobile client.
+
+        '
+    clientToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'Short-lived, per-request JWT (`ES256`) minted at request creation, scoped
+
+        `{tenant, requestId, purpose, method, allowedOrigins}`. Safe to hand to a browser/mobile client:
+
+        it cannot create requests, read tenant data, or touch other requests. For browser clients the API
+
+        enforces `Origin` against `allowedOrigins` (rejects cross-origin replay).
+
+        '
+    downloadToken:
+      type: apiKey
+      in: query
+      name: downloadToken
+      description: One-off token returned with a completed sign result, for fetching the signed document.
+externalDocs:
+  description: Quickstart, SDKs, test data, pricing and lifecycle policy
+  url: https://atk.tvarka.pro/docs/
+x-refined-from:
+- tvarka-atk-api-auth-openapi.yaml
+- tvarka-atk-api-openapi-original.json

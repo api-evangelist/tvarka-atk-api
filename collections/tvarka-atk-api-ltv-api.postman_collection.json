@@ -1,0 +1,1329 @@
+{
+  "item": [
+    {
+      "id": "47009a01-fb4c-481d-8bd1-4b584d3f52cf",
+      "name": "LTV",
+      "description": {
+        "content": "Post-signature timestamp and long-term-validation upgrades.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "62711993-1ad5-4f43-a6e9-ba21ecf6a0c8",
+          "name": "Add qualified timestamps to untimestamped XAdES signatures",
+          "request": {
+            "name": "Add qualified timestamps to untimestamped XAdES signatures",
+            "description": {
+              "content": "Paid-tier, Basic-authenticated synchronous service for ASiC-E and ADOC. Every XAdES signature\nwithout SignatureTimeStamp receives an RFC 3161 token; existing timestamps are preserved. Emits\nexactly one `atk.timestamp` event and returns a one-off output download token.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "timestamp"
+              ],
+              "host": [
+                "{{timestamp-Url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                "key": "Idempotency-Key",
+                "value": "<string>"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basicAuthUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basicAuthPassword}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"document\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "3bee832b-5dad-4a22-8f72-ad428796285f",
+              "name": "Timestamped container is ready.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "timestamp"
+                  ],
+                  "host": [
+                    "{{timestamp-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"requestId\": \"34bfe74f-24f9-cb99-8ca1-51ed5dcdd9c2\",\n  \"status\": \"string\",\n  \"service\": \"timestamp\",\n  \"format\": \"asice\",\n  \"downloadToken\": \"string\",\n  \"timestampedSignatures\": 1056,\n  \"archived\": true,\n  \"changed\": true,\n  \"level\": \"string\",\n  \"signatureField\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "05f791f6-ced3-448d-8e4a-25bca4762f36",
+              "name": "Malformed input (e.g. container format without document, hash without raw).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "timestamp"
+                  ],
+                  "host": [
+                    "{{timestamp-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"9e35952e-e982-fb8a-2a83-40b9f1b2a8b3\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "061ae35a-64e9-4614-8cac-af2928672641",
+              "name": "Missing/invalid credentials or client token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "timestamp"
+                  ],
+                  "host": [
+                    "{{timestamp-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"9e35952e-e982-fb8a-2a83-40b9f1b2a8b3\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9cbe2985-fa49-47ce-b590-d39040f69e9a",
+              "name": "Format not allowed / origin not allowed / tenant suspended.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "timestamp"
+                  ],
+                  "host": [
+                    "{{timestamp-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"9e35952e-e982-fb8a-2a83-40b9f1b2a8b3\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "cb4471ca-d7b7-46f6-81a4-030c80064b35",
+              "name": "Spent operation token, identity swap, terminal request, or idempotency conflict/in-progress operation.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "timestamp"
+                  ],
+                  "host": [
+                    "{{timestamp-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"9e35952e-e982-fb8a-2a83-40b9f1b2a8b3\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "f63dbd72-ab9a-4e15-98ae-d7cd4270cec8",
+              "name": "Document exceeds the tenant's max size.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "timestamp"
+                  ],
+                  "host": [
+                    "{{timestamp-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Request Entity Too Large",
+              "code": 413,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"9e35952e-e982-fb8a-2a83-40b9f1b2a8b3\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "8ab17d02-01e4-467a-849a-d37e045e9c45",
+              "name": "Too many requests.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "timestamp"
+                  ],
+                  "host": [
+                    "{{timestamp-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "key": "Retry-After",
+                  "value": "4081",
+                  "description": ""
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"9e35952e-e982-fb8a-2a83-40b9f1b2a8b3\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "e2de81e4-8b89-43dc-94bc-66f057b78b05",
+              "name": "Validation/TSA/revocation dependency failed transiently; retry with the same Idempotency-Key.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "timestamp"
+                  ],
+                  "host": [
+                    "{{timestamp-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"9e35952e-e982-fb8a-2a83-40b9f1b2a8b3\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "3000abf0-7149-4f7a-93ee-5bdc521287d7",
+          "name": "Upgrade a PAdES B-T signature to PAdES B-LT",
+          "request": {
+            "name": "Upgrade a PAdES B-T signature to PAdES B-LT",
+            "description": {
+              "content": "Paid-tier, Basic-authenticated synchronous service. Fresh signer and TSA revocation evidence is\ncollected and embedded as DSS/VRI; the OCSP freshness hard rule applies. Already-valid B-LT is\nreturned unchanged. Emits exactly one `atk.archive` event and returns a one-off download token.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "archive"
+              ],
+              "host": [
+                "{{archive-Url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                "key": "Idempotency-Key",
+                "value": "<string>"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basicAuthUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basicAuthPassword}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"document\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "b22e97a4-49a0-4af5-97a0-7cc2e7ed69d5",
+              "name": "PAdES B-LT document is ready.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "archive"
+                  ],
+                  "host": [
+                    "{{archive-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"requestId\": \"34bfe74f-24f9-cb99-8ca1-51ed5dcdd9c2\",\n  \"status\": \"string\",\n  \"service\": \"timestamp\",\n  \"format\": \"asice\",\n  \"downloadToken\": \"string\",\n  \"timestampedSignatures\": 1056,\n  \"archived\": true,\n  \"changed\": true,\n  \"level\": \"string\",\n  \"signatureField\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b8fb968f-59d4-4bf2-97ca-c7560ce42eba",
+              "name": "Malformed input (e.g. container format without document, hash without raw).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "archive"
+                  ],
+                  "host": [
+                    "{{archive-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"9e35952e-e982-fb8a-2a83-40b9f1b2a8b3\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5faa4f37-3cb2-4569-98d3-ddcb07593305",
+              "name": "Missing/invalid credentials or client token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "archive"
+                  ],
+                  "host": [
+                    "{{archive-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"9e35952e-e982-fb8a-2a83-40b9f1b2a8b3\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "eba45ac3-9d57-464a-90ac-28e612af3dca",
+              "name": "Format not allowed / origin not allowed / tenant suspended.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "archive"
+                  ],
+                  "host": [
+                    "{{archive-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"9e35952e-e982-fb8a-2a83-40b9f1b2a8b3\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "816992ef-1cfb-4520-9931-622bd3c7cf5c",
+              "name": "Spent operation token, identity swap, terminal request, or idempotency conflict/in-progress operation.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "archive"
+                  ],
+                  "host": [
+                    "{{archive-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"9e35952e-e982-fb8a-2a83-40b9f1b2a8b3\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6c05cd15-89be-4e92-af2e-528863b53c6e",
+              "name": "Document exceeds the tenant's max size.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "archive"
+                  ],
+                  "host": [
+                    "{{archive-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Request Entity Too Large",
+              "code": 413,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"9e35952e-e982-fb8a-2a83-40b9f1b2a8b3\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "0133857b-71ed-4bc9-a503-0a1b306f9b5d",
+              "name": "Too many requests.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "archive"
+                  ],
+                  "host": [
+                    "{{archive-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "key": "Retry-After",
+                  "value": "4081",
+                  "description": ""
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"9e35952e-e982-fb8a-2a83-40b9f1b2a8b3\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c49563d6-6cd6-4cd1-88b5-b24ac4014264",
+              "name": "Validation/TSA/revocation dependency failed transiently; retry with the same Idempotency-Key.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "archive"
+                  ],
+                  "host": [
+                    "{{archive-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"9e35952e-e982-fb8a-2a83-40b9f1b2a8b3\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "a7dc52a8-be01-4b2c-962f-ca4a6d96b8a4",
+          "name": "Download timestamp/archive output",
+          "request": {
+            "name": "Download timestamp/archive output",
+            "description": {},
+            "url": {
+              "path": [
+                "services",
+                ":requestId",
+                "document"
+              ],
+              "host": [
+                "{{services-requestId-document-Url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "requestId",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/octet-stream"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basicAuthUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basicAuthPassword}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "5b031653-90a3-401e-900d-90dc93fca58b",
+              "name": "Transformed artifact bytes.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "services",
+                    ":requestId",
+                    "document"
+                  ],
+                  "host": [
+                    "{{services-requestId-document-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/octet-stream"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "body": "string",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "357661d1-f00d-4ace-8de3-e8774a726e24",
+              "name": "Missing/invalid credentials or client token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "services",
+                    ":requestId",
+                    "document"
+                  ],
+                  "host": [
+                    "{{services-requestId-document-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"9e35952e-e982-fb8a-2a83-40b9f1b2a8b3\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ac9fad95-400f-426e-ad9a-edd3df187910",
+              "name": "Unknown request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "services",
+                    ":requestId",
+                    "document"
+                  ],
+                  "host": [
+                    "{{services-requestId-document-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"9e35952e-e982-fb8a-2a83-40b9f1b2a8b3\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "baseUrl"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "timestamp-Url"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "archive-Url"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "services-requestId-document-Url"
+    }
+  ],
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "username",
+        "value": "{{basicAuthUsername}}"
+      },
+      {
+        "key": "password",
+        "value": "{{basicAuthPassword}}"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "c3da52ff-9708-41b4-8c30-1ed9bb9f8e37",
+    "name": "Tvarka Atk LTV API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Operations tagged LTV across 2 of this provider's published API definitions: tvarka-atk-api-openapi-original.json, tvarka-atk-api-sign-openapi.yaml. Each path carries the servers of the definition it was published in.",
+      "type": "text/plain"
+    }
+  }
+}

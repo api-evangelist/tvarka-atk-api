@@ -1,0 +1,92 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Tvarka Atk Erasure API",
+    "version": "1.3.0"
+  },
+  "request": {
+    "auth": {
+      "type": "basic",
+      "username": "{{username}}",
+      "password": "{{password}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Erasure",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Erase one request on demand (GDPR)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://atk.tvarka.pro/v1/auth/:requestId/delete",
+            "params": [
+              {
+                "name": "requestId",
+                "value": "",
+                "type": "path",
+                "description": "The `requestId` returned by `POST /auth/requests`."
+              }
+            ],
+            "auth": {
+              "type": "basic",
+              "username": "{{username}}",
+              "password": "{{password}}"
+            }
+          },
+          "docs": "Basic only, scoped to the caller's own provider. A non-terminal request is cancelled first,\nthen its document/result bytes + derived personal data are purged (exactly what the retention\njob strips); a de-identified audit row remains. Idempotent.\n"
+        },
+        {
+          "info": {
+            "name": "Bulk-erase the provider's terminal requests (GDPR)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://atk.tvarka.pro/v1/erasure",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "basic",
+              "username": "{{username}}",
+              "password": "{{password}}"
+            }
+          },
+          "docs": "Basic only. Purges document/result bytes + derived personal data of every TERMINAL,\nnot-yet-purged request of the calling provider (auth and sign alike); optional `before`\n(ISO-8601) restricts to requests last updated before that moment. In-flight requests are\nleft untouched - erase them individually if intended.\n"
+        },
+        {
+          "info": {
+            "name": "Erase one request on demand (GDPR)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://atk.tvarka.pro/v1/sign/:requestId/delete",
+            "params": [
+              {
+                "name": "requestId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "basic",
+              "username": "{{username}}",
+              "password": "{{password}}"
+            }
+          },
+          "docs": "Basic only, scoped to the caller's own provider. A non-terminal request is cancelled first,\nthen its document/container bytes + derived personal data are purged (exactly what the\nretention job strips); a de-identified audit row remains. Idempotent. Bulk erasure lives on\nthe base API (`POST /v1/erasure`) and covers sign requests too.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

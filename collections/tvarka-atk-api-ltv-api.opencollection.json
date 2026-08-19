@@ -1,0 +1,100 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Tvarka Atk LTV API",
+    "version": "1.3.0"
+  },
+  "request": {
+    "auth": {
+      "type": "basic",
+      "username": "{{username}}",
+      "password": "{{password}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "LTV",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Add qualified timestamps to untimestamped XAdES signatures",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://atk.tvarka.pro/v1/timestamp",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "basic",
+              "username": "{{username}}",
+              "password": "{{password}}"
+            }
+          },
+          "docs": "Paid-tier, Basic-authenticated synchronous service for ASiC-E and ADOC. Every XAdES signature\nwithout SignatureTimeStamp receives an RFC 3161 token; existing timestamps are preserved. Emits\nexactly one `atk.timestamp` event and returns a one-off output download token.\n"
+        },
+        {
+          "info": {
+            "name": "Upgrade a PAdES B-T signature to PAdES B-LT",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://atk.tvarka.pro/v1/archive",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "basic",
+              "username": "{{username}}",
+              "password": "{{password}}"
+            }
+          },
+          "docs": "Paid-tier, Basic-authenticated synchronous service. Fresh signer and TSA revocation evidence is\ncollected and embedded as DSS/VRI; the OCSP freshness hard rule applies. Already-valid B-LT is\nreturned unchanged. Emits exactly one `atk.archive` event and returns a one-off download token.\n"
+        },
+        {
+          "info": {
+            "name": "Download timestamp/archive output",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://atk.tvarka.pro/v1/services/:requestId/document",
+            "params": [
+              {
+                "name": "requestId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "basic",
+              "username": "{{username}}",
+              "password": "{{password}}"
+            }
+          },
+          "docs": "Download timestamp/archive output"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -1,0 +1,44 @@
+{
+  "item": [
+    {
+      "id": "4ff728f0-b002-46c1-afed-5e2755db4623",
+      "name": "Tvarka ATK QES Signing API (paid Tier Addendum)",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "username",
+        "value": "{{basicAuthUsername}}"
+      },
+      {
+        "key": "password",
+        "value": "{{basicAuthPassword}}"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "8dfed88e-734d-4fd8-a5f4-ce220f83955c",
+    "name": "Tvarka ATK - QES Signing API (paid-tier addendum) Tvarka ATK QES Signing API (paid Tier Addendum) Tvarka ATK QES Signing API (paid Tier Addendum) API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "The QES half of the ATK API - `/v1/sign/*`. This is the **paid-tier addendum** to\n`tvarka_atk_auth_api.openapi.yaml`: same providers, same credential model, same card stack and\ntwo-phase ceremony; QES adds document assembly, an async validation axis, and metering. The shared\nprimitive schemas + security schemes are mirrored here so this file validates standalone; they are\nidentical to the auth contract.\n\n## Flow (same shape as auth, over a document)\n  1. `POST /v1/sign/requests` (HTTP Basic) - the provider supplies the document (bytes or an\n     allow-listed `documentRef`, or a bare `hash` for `format:\"raw\"`), and receives `clientToken`.\n  2. `POST /v1/sign/{requestId}/certificate` (Bearer clientToken) - the client submits the card's\n     **signing** certificate; the API prepares the format-specific DTBS and returns it +\n     `operationToken`.\n  3. The client drives the card to sign the DTBS with the QES key (after PIN).\n  4. `POST /v1/sign/{requestId}/complete` (Bearer clientToken) - the API verifies the signature,\n     assembles + timestamps the AdES container, and returns `status:\"done\"` with\n     `validation:{status:\"pending\"}`.\n\n## Smart-ID and Mobile-ID flow\n  For `method:\"smart_id\"` or `method:\"mobile_id\"`, create a PAdES request with `personalCode`\n  and, for Mobile-ID, `phoneNumber`. The response has a user verification code and no\n  `clientToken`; poll GET with Basic credentials or consume the terminal webhook. The\n  `/certificate` and `/complete` calls are not used. Remote methods are PAdES-only in v1.3;\n  physical/NFC remain available for raw, ASiC-E, and ADOC.\n\n## Two axes: `done` vs `validation`\n  * `status:\"done\"` = the container is assembled AND the signer signature is verified. This is the\n    deliverable and the **billable** event.\n  * `validation.status` transitions `pending -> passed | failed` **asynchronously** (SiVa runs after\n    completion). The validator is **advisory, not authoritative** (LT/EU trusted-list snapshots have\n    wrongly flagged the primary QTSA); a sub-qualified result raises an alarm for review - it does\n    NOT change `status`, invalidate the container, or reverse billing.\n\n## Billing\n  One usage event **at completion**, never gated on an advisory validator: `atk.sign` for a signing\n  ceremony, and `atk.validate` / `atk.timestamp` / `atk.archive` for the v1.1 synchronous services.\n  Auth (`atk.auth`) is a separate, also-invoiceable event; whether a provider/tier is actually\n  charged is a pricing decision (ePaslaugos = zero-rated free tier; third parties = metered).\n\n## Timestamp + revocation\n  Qualified timestamp uses **APED** as the primary QTSA (BalTstamp fallback; ACCV opt-in for a\n  personal tier). The embedded revocation (OCSP) is fetched fresh at signing time and **never cached\n  or prefetched** - a cached OCSP response invalidates the signature.\n\n## Get access\n  Request a zero-rated sandbox key at <https://atk.tvarka.pro/docs/access/> (issued after a short\n  review). Full docs, rendered reference, and Postman collections at <https://atk.tvarka.pro/docs/>.\n\n\nContact Support:\n Name: Tvarka\n Email: info@tvarka.pro",
+      "type": "text/plain"
+    }
+  }
+}

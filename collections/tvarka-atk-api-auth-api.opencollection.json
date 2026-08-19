@@ -1,0 +1,147 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Tvarka Atk Auth API",
+    "version": "1.3.0"
+  },
+  "request": {
+    "auth": {
+      "type": "basic",
+      "username": "{{username}}",
+      "password": "{{password}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Auth",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Create an authentication request (server-to-server)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://atk.tvarka.pro/v1/auth/requests",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "basic",
+              "username": "{{username}}",
+              "password": "{{password}}"
+            }
+          },
+          "docs": "Called by the provider's backend with HTTP Basic (`keyId:keySecret`). `audience` must be an\nexact origin on the provider's allow-list. Physical requests return a short-lived `clientToken`;\nNFC requests return a pairing hint; Smart-ID/Mobile-ID requests remain entirely server-side.\n"
+        },
+        {
+          "info": {
+            "name": "Submit the card's authentication certificate; receive the DTBS + challenge",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://atk.tvarka.pro/v1/auth/:requestId/certificate",
+            "params": [
+              {
+                "name": "requestId",
+                "value": "",
+                "type": "path",
+                "description": "The `requestId` returned by `POST /auth/requests`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Called by the client with `Authorization: Bearer <clientToken>`. The API validates the\ncertificate (chain, revocation, purpose = authentication, key usage), builds the canonical\nchallenge, and returns the exact `dtbs` the card must sign plus a single-use `operationToken`.\nPhysical/NFC only; server-side methods do not call this endpoint.\n"
+        },
+        {
+          "info": {
+            "name": "Submit the raw card signature; receive the verified identity",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://atk.tvarka.pro/v1/auth/:requestId/complete",
+            "params": [
+              {
+                "name": "requestId",
+                "value": "",
+                "type": "path",
+                "description": "The `requestId` returned by `POST /auth/requests`."
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Called by the client with `Authorization: Bearer <clientToken>` and the single-use\n`operationToken` in the body. The API verifies the signature against the stored `dtbs` and the\ncertificate's public key, enforces the identity-swap guard, and returns the verified identity\n(and the optional `assertion` JWT). Retry-safe: a repeat with the same tuple returns the same\nresult; a different signature/cert after the token is claimed is rejected.\nPhysical/NFC only; server-side methods complete asynchronou"
+        },
+        {
+          "info": {
+            "name": "Poll request status / fetch the result",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://atk.tvarka.pro/v1/auth/:requestId",
+            "params": [
+              {
+                "name": "requestId",
+                "value": "",
+                "type": "path",
+                "description": "The `requestId` returned by `POST /auth/requests`."
+              }
+            ],
+            "auth": {
+              "type": "basic",
+              "username": "{{username}}",
+              "password": "{{password}}"
+            }
+          },
+          "docs": "Readable with the provider's Basic credentials for every method, or with the request's\n`clientToken` for physical/NFC requests. Smart-ID/Mobile-ID providers poll this endpoint or\nconsume the terminal webhook.\n"
+        },
+        {
+          "info": {
+            "name": "Cancel a non-terminal request",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://atk.tvarka.pro/v1/auth/:requestId/cancel",
+            "params": [
+              {
+                "name": "requestId",
+                "value": "",
+                "type": "path",
+                "description": "The `requestId` returned by `POST /auth/requests`."
+              }
+            ],
+            "auth": {
+              "type": "basic",
+              "username": "{{username}}",
+              "password": "{{password}}"
+            }
+          },
+          "docs": "Cancel a non-terminal request"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

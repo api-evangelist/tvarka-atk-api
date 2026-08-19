@@ -1,0 +1,174 @@
+{
+  "item": [
+    {
+      "id": "b8e91bdf-8593-46e2-9319-800f3fb429a8",
+      "name": "Well-known",
+      "description": {
+        "content": "Keys for verifying the optional `assertion` JWT.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "643e0e4a-4a84-44f8-8e2b-e7b4118db2a6",
+          "name": "JWKS for verifying the optional `assertion` JWT",
+          "request": {
+            "name": "JWKS for verifying the optional `assertion` JWT",
+            "description": {
+              "content": "Public keys (by `kid`) for the ES256 signer. Rotation keeps current + previous keys published so\nin-flight assertions verify.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                ".well-known",
+                "atk-jwks.json"
+              ],
+              "host": [
+                "{{.well-known-atk-jwks.json-Url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "77a9558f-b466-4933-898d-e4efeee94a61",
+              "name": "Key set.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    ".well-known",
+                    "atk-jwks.json"
+                  ],
+                  "host": [
+                    "{{.well-known-atk-jwks.json-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "a9fd88d3-b5d4-487e-9a1b-36cb01c529fe",
+              "name": "Unknown request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    ".well-known",
+                    "atk-jwks.json"
+                  ],
+                  "host": [
+                    "{{.well-known-atk-jwks.json-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"invalid_client_token\",\n    \"message\": \"string\",\n    \"requestId\": \"4350840d-1228-152c-8cf8-57b822882969\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "baseUrl"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro",
+      "key": ".well-known-atk-jwks.json-Url"
+    }
+  ],
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "username",
+        "value": "{{basicAuthUsername}}"
+      },
+      {
+        "key": "password",
+        "value": "{{basicAuthPassword}}"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "788e27f7-23a4-4805-9641-0c2f9c5ebef2",
+    "name": "Tvarka Atk Well Known API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Operations tagged Well-known across 2 of this provider's published API definitions: tvarka-atk-api-auth-openapi.yaml, tvarka-atk-api-openapi-original.json. Each path carries the servers of the definition it was published in.",
+      "type": "text/plain"
+    }
+  }
+}

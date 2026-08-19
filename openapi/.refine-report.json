@@ -1,0 +1,41 @@
+{
+  "provider": "tvarka-atk-api",
+  "sources": [
+    "tvarka-atk-api-auth-api-openapi.yml",
+    "tvarka-atk-api-erasure-api-openapi.yml",
+    "tvarka-atk-api-ltv-api-openapi.yml",
+    "tvarka-atk-api-pairing-api-openapi.yml",
+    "tvarka-atk-api-sign-api-openapi.yml",
+    "tvarka-atk-api-tvarka-atk-api-api-openapi.yml",
+    "tvarka-atk-api-tvarka-atk-qes-signing-api-paid-tier-addendum-api-openapi.yml",
+    "tvarka-atk-api-validation-api-openapi.yml",
+    "tvarka-atk-api-well-known-api-openapi.yml"
+  ],
+  "outputs": [
+    "tvarka-atk-api-auth-api-openapi.yml",
+    "tvarka-atk-api-erasure-api-openapi.yml",
+    "tvarka-atk-api-ltv-api-openapi.yml",
+    "tvarka-atk-api-pairing-api-openapi.yml",
+    "tvarka-atk-api-sign-api-openapi.yml",
+    "tvarka-atk-api-tvarka-atk-api-api-openapi.yml",
+    "tvarka-atk-api-tvarka-atk-qes-signing-api-paid-tier-addendum-api-openapi.yml",
+    "tvarka-atk-api-validation-api-openapi.yml",
+    "tvarka-atk-api-well-known-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "tvarka-atk-api-auth-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "tvarka-atk-api-erasure-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "tvarka-atk-api-ltv-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "tvarka-atk-api-pairing-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "tvarka-atk-api-sign-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "tvarka-atk-api-tvarka-atk-api-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "tvarka-atk-api-tvarka-atk-qes-signing-api-paid-tier-addendum-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "tvarka-atk-api-validation-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "tvarka-atk-api-well-known-api-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": []
+}

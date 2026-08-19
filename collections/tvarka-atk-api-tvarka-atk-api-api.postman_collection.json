@@ -1,0 +1,44 @@
+{
+  "item": [
+    {
+      "id": "f3573e73-e415-45c5-92d8-cd5da474e655",
+      "name": "Tvarka ATK API",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "username",
+        "value": "{{basicAuthUsername}}"
+      },
+      {
+        "key": "password",
+        "value": "{{basicAuthPassword}}"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "ca03240c-a55a-41a0-9e6b-3ee37274b981",
+    "name": "Tvarka ATK Tvarka ATK API API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "The canonical ATK API contract. ATK physical-reader and NFC ceremonies are the primary authentication and signing methods. Smart-ID and Mobile-ID are optional server-side methods under the same request, polling, webhook and metering model. Start with the [five-minute quickstart](https://atk.tvarka.pro/docs/quickstart/) or use the specialist [authentication](https://atk.tvarka.pro/docs/auth/) and [signing](https://atk.tvarka.pro/docs/sign/) references.\n\nContact Support:\n Name: Tvarka API team\n Email: info@tvarka.pro",
+      "type": "text/plain"
+    }
+  }
+}

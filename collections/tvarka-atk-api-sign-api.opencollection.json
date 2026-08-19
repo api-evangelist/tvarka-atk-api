@@ -1,0 +1,204 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Tvarka Atk Sign API",
+    "version": "1.3.0"
+  },
+  "request": {
+    "auth": {
+      "type": "basic",
+      "username": "{{username}}",
+      "password": "{{password}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Sign",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Create a signing request (server-to-server)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://atk.tvarka.pro/v1/sign/requests",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "basic",
+              "username": "{{username}}",
+              "password": "{{password}}"
+            }
+          },
+          "docs": "HTTP Basic. Provide the document one of three ways - inline `document` (base64), an allow-listed\n`documentRef`, or a bare `hash` (only for `format:\"raw\"`). Container formats\n(pades/asice/adoc) require exactly one of `document` or `documentRef`. PAdES accepts an unsigned\nor already-signed PDF; ASiC-E/ADOC accept either a PDF (Tvarka constructs a new single-payload\ncontainer) or an existing valid container, which is treated as an opaque whole and receives one\nadditional signature without payload o"
+        },
+        {
+          "info": {
+            "name": "Submit the card's signing certificate; receive the DTBS",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://atk.tvarka.pro/v1/sign/:requestId/certificate",
+            "params": [
+              {
+                "name": "requestId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Bearer clientToken. The API validates the certificate (chain, revocation, purpose =\nsigning/content-commitment, qualified/QSCD evidence), prepares the format-specific DTBS (for\nPAdES - the SHA-256 CAdES SignedAttributes digest; SHA-256 for both key curves), and returns\nit + `operationToken`. Physical/NFC only.\n"
+        },
+        {
+          "info": {
+            "name": "Submit the raw card signature; assemble the container",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://atk.tvarka.pro/v1/sign/:requestId/complete",
+            "params": [
+              {
+                "name": "requestId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "bearer",
+              "token": "{{bearerToken}}"
+            }
+          },
+          "docs": "Bearer clientToken + single-use `operationToken`. Synchronous: the API verifies the signature\nagainst the stored DTBS + cert, assembles + timestamps the AdES container inline, schedules\nasync validation, and returns `200 done` with `validation:{status:\"pending\"}` (or\n`notApplicable` in sandbox/raw, or the internal ADOC verdict). `finalizing` is observable via\nGET only if a crash wedges the request until the reaper releases it. Retry-safe; a transient\nassembly failure returns a retryable 5xx with"
+        },
+        {
+          "info": {
+            "name": "Poll status + validation axis; fetch the result",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://atk.tvarka.pro/v1/sign/:requestId",
+            "params": [
+              {
+                "name": "requestId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "basic",
+              "username": "{{username}}",
+              "password": "{{password}}"
+            }
+          },
+          "docs": "Poll status + validation axis; fetch the result"
+        },
+        {
+          "info": {
+            "name": "Download the signed container",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://atk.tvarka.pro/v1/sign/:requestId/document",
+            "params": [
+              {
+                "name": "requestId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "basic",
+              "username": "{{username}}",
+              "password": "{{password}}"
+            }
+          },
+          "docs": "Authorized by the provider's Basic credentials or a `downloadToken` query param."
+        },
+        {
+          "info": {
+            "name": "Cancel a non-terminal request",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://atk.tvarka.pro/v1/sign/:requestId/cancel",
+            "params": [
+              {
+                "name": "requestId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "basic",
+              "username": "{{username}}",
+              "password": "{{password}}"
+            }
+          },
+          "docs": "Cancel a non-terminal request"
+        },
+        {
+          "info": {
+            "name": "Rotate and return the NFC pairing token for a sign request",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://atk.tvarka.pro/v1/sign/:requestId/pairing",
+            "params": [
+              {
+                "name": "requestId",
+                "value": "",
+                "type": "path"
+              }
+            ],
+            "auth": {
+              "type": "basic",
+              "username": "{{username}}",
+              "password": "{{password}}"
+            }
+          },
+          "docs": "Rotate and return the NFC pairing token for a sign request"
+        },
+        {
+          "info": {
+            "name": "Atomically claim an auth or sign NFC pairing",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://atk.tvarka.pro/v1/pairing/claim",
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Atomically claim an auth or sign NFC pairing"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

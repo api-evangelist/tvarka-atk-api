@@ -1,0 +1,1738 @@
+{
+  "item": [
+    {
+      "id": "32843b74-949a-4776-9b34-917555067c83",
+      "name": "Auth",
+      "description": {
+        "content": "The eID authentication ceremony (`/v1/auth/*`).",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "b49bcd34-876f-4738-9590-d0628a6419ca",
+          "name": "Create an authentication request (server-to-server)",
+          "request": {
+            "name": "Create an authentication request (server-to-server)",
+            "description": {
+              "content": "Called by the provider's backend with HTTP Basic (`keyId:keySecret`). `audience` must be an\nexact origin on the provider's allow-list. Physical requests return a short-lived `clientToken`;\nNFC requests return a pairing hint; Smart-ID/Mobile-ID requests remain entirely server-side.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "auth",
+                "requests"
+              ],
+              "host": [
+                "{{auth-requests-Url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basicAuthUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basicAuthPassword}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "0b008767-16c3-4cd2-8240-f59abedd98f7",
+              "name": "Request created; awaiting the ATK client or remote user authorization.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    "requests"
+                  ],
+                  "host": [
+                    "{{auth-requests-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"audience\": \"https://app.example\",\n  \"method\": \"physical\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Accepted",
+              "code": 202,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"requestId\": \"5dcc4856-be65-13ba-c61d-aa0c640db058\",\n  \"method\": \"physical\",\n  \"verificationCode\": \"string\",\n  \"status\": \"certInvalid\",\n  \"expiresAt\": \"1976-04-24T00:44:23.601Z\",\n  \"clientToken\": \"string\",\n  \"challengeProfile\": \"string\",\n  \"nonce\": \"string\",\n  \"pairing\": {\n    \"pairingUrl\": \"https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN\",\n    \"deepLink\": \"tvarkasign://atk/pair/PAIRING_TOKEN\",\n    \"qrPayload\": \"https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "dfdf4b4a-8a8a-4eb6-bcdd-260fc3eef9ef",
+              "name": "Malformed input.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    "requests"
+                  ],
+                  "host": [
+                    "{{auth-requests-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"audience\": \"https://app.example\",\n  \"method\": \"physical\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "2231462e-87ad-45b4-835c-4f553ec5083f",
+              "name": "Missing/invalid credentials or client token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    "requests"
+                  ],
+                  "host": [
+                    "{{auth-requests-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"audience\": \"https://app.example\",\n  \"method\": \"physical\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5758ef9b-0f01-4e40-b51c-8580fbf1246c",
+              "name": "Authorized but not permitted (origin/format/tenant).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    "requests"
+                  ],
+                  "host": [
+                    "{{auth-requests-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"audience\": \"https://app.example\",\n  \"method\": \"physical\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "98888427-54dc-42ee-a7f4-95b3075af722",
+              "name": "Too many requests.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    "requests"
+                  ],
+                  "host": [
+                    "{{auth-requests-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"audience\": \"https://app.example\",\n  \"method\": \"physical\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds.",
+                  "key": "Retry-After",
+                  "value": "2903"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "620095b0-e52f-48b3-9a4f-9cb29d5e1daa",
+              "name": "A required remote or erasure service is temporarily unavailable.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    "requests"
+                  ],
+                  "host": [
+                    "{{auth-requests-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"audience\": \"https://app.example\",\n  \"method\": \"physical\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "31fbd6b1-8f8b-40a8-9830-d61db55f8fc2",
+          "name": "Submit the card's authentication certificate; receive the DTBS + challenge",
+          "request": {
+            "name": "Submit the card's authentication certificate; receive the DTBS + challenge",
+            "description": {
+              "content": "Called by the client with `Authorization: Bearer <clientToken>`. The API validates the\ncertificate (chain, revocation, purpose = authentication, key usage), builds the canonical\nchallenge, and returns the exact `dtbs` the card must sign plus a single-use `operationToken`.\nPhysical/NFC only; server-side methods do not call this endpoint.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "auth",
+                ":requestId",
+                "certificate"
+              ],
+              "host": [
+                "{{auth-requestId-certificate-Url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "requestId",
+                  "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"certificate\": \"<byte>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "09be4832-a15f-493c-93c0-df145776a638",
+              "name": "DTBS + challenge + operation token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "certificate"
+                  ],
+                  "host": [
+                    "{{auth-requestId-certificate-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"certificate\": \"<byte>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"requestId\": \"94faca10-476f-8843-39b0-476830f453ea\",\n  \"dtbs\": \"string\",\n  \"dtbsHashAlgOid\": \"2.16.840.1.101.3.4.2.1\",\n  \"operationToken\": \"string\",\n  \"challenge\": {\n    \"profile\": \"string\",\n    \"audience\": \"string\",\n    \"nonce\": \"string\"\n  },\n  \"cert\": {\n    \"subject\": {\n      \"serialNumber\": \"PNOLT-39001010000\",\n      \"givenName\": \"string\",\n      \"sn\": \"string\",\n      \"cn\": \"string\",\n      \"c\": \"LT\"\n    }\n  },\n  \"verificationCode\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "984dba19-9b78-4ea9-831c-cc16621da492",
+              "name": "Missing/invalid credentials or client token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "certificate"
+                  ],
+                  "host": [
+                    "{{auth-requestId-certificate-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"certificate\": \"<byte>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "7609ba13-738d-4c1a-bfc8-8f5fb4c04404",
+              "name": "Authorized but not permitted (origin/format/tenant).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "certificate"
+                  ],
+                  "host": [
+                    "{{auth-requestId-certificate-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"certificate\": \"<byte>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "11633045-d442-43f2-922a-9aef26baf556",
+              "name": "Unknown request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "certificate"
+                  ],
+                  "host": [
+                    "{{auth-requestId-certificate-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"certificate\": \"<byte>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "03589c22-095b-4977-8aaa-f1b5752a1ca5",
+              "name": "State/idempotency conflict (spent operation token, identity swap, terminal request).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "certificate"
+                  ],
+                  "host": [
+                    "{{auth-requestId-certificate-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"certificate\": \"<byte>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6e8bd62a-2b44-498f-a021-71faa135fc7f",
+              "name": "Semantic reject (cert purpose/chain/revocation, dtbs mismatch, bad signature).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "certificate"
+                  ],
+                  "host": [
+                    "{{auth-requestId-certificate-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"certificate\": \"<byte>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "fc30d4e8-42ae-43c4-b475-ab23e8c24fca",
+          "name": "Submit the raw card signature; receive the verified identity",
+          "request": {
+            "name": "Submit the raw card signature; receive the verified identity",
+            "description": {
+              "content": "Called by the client with `Authorization: Bearer <clientToken>` and the single-use\n`operationToken` in the body. The API verifies the signature against the stored `dtbs` and the\ncertificate's public key, enforces the identity-swap guard, and returns the verified identity\n(and the optional `assertion` JWT). Retry-safe: a repeat with the same tuple returns the same\nresult; a different signature/cert after the token is claimed is rejected.\nPhysical/NFC only; server-side methods complete asynchronously.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "auth",
+                ":requestId",
+                "complete"
+              ],
+              "host": [
+                "{{auth-requestId-complete-Url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "requestId",
+                  "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"signature\": \"<byte>\",\n  \"signatureAlgorithm\": \"<string>\",\n  \"operationToken\": \"<string>\",\n  \"signatureEncoding\": \"P1363\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "b156776f-cae8-4fe8-a711-a5478e04f534",
+              "name": "Authenticated - verified identity.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "complete"
+                  ],
+                  "host": [
+                    "{{auth-requestId-complete-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"signature\": \"<byte>\",\n  \"signatureAlgorithm\": \"<string>\",\n  \"operationToken\": \"<string>\",\n  \"signatureEncoding\": \"P1363\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"string\",\n  \"method\": \"physical\",\n  \"sig\": \"string\",\n  \"cert\": {\n    \"subject\": {\n      \"serialNumber\": \"PNOLT-39001010000\",\n      \"givenName\": \"string\",\n      \"sn\": \"string\",\n      \"cn\": \"string\",\n      \"c\": \"LT\"\n    },\n    \"der\": \"string\"\n  },\n  \"assertion\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "f98b192e-c94a-4737-ad91-6fb2c8cd71f4",
+              "name": "Missing/invalid credentials or client token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "complete"
+                  ],
+                  "host": [
+                    "{{auth-requestId-complete-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"signature\": \"<byte>\",\n  \"signatureAlgorithm\": \"<string>\",\n  \"operationToken\": \"<string>\",\n  \"signatureEncoding\": \"P1363\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "a5194f18-6ca1-43e7-9896-37e1d09f3051",
+              "name": "Authorized but not permitted (origin/format/tenant).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "complete"
+                  ],
+                  "host": [
+                    "{{auth-requestId-complete-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"signature\": \"<byte>\",\n  \"signatureAlgorithm\": \"<string>\",\n  \"operationToken\": \"<string>\",\n  \"signatureEncoding\": \"P1363\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "294c06f1-c953-4cd4-b020-59512f359568",
+              "name": "Unknown request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "complete"
+                  ],
+                  "host": [
+                    "{{auth-requestId-complete-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"signature\": \"<byte>\",\n  \"signatureAlgorithm\": \"<string>\",\n  \"operationToken\": \"<string>\",\n  \"signatureEncoding\": \"P1363\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "abfcbb32-8503-4b38-ba5a-265941d0cf93",
+              "name": "State/idempotency conflict (spent operation token, identity swap, terminal request).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "complete"
+                  ],
+                  "host": [
+                    "{{auth-requestId-complete-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"signature\": \"<byte>\",\n  \"signatureAlgorithm\": \"<string>\",\n  \"operationToken\": \"<string>\",\n  \"signatureEncoding\": \"P1363\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "49a79eec-d88f-4c94-9267-5715265e468e",
+              "name": "Semantic reject (cert purpose/chain/revocation, dtbs mismatch, bad signature).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "complete"
+                  ],
+                  "host": [
+                    "{{auth-requestId-complete-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"signature\": \"<byte>\",\n  \"signatureAlgorithm\": \"<string>\",\n  \"operationToken\": \"<string>\",\n  \"signatureEncoding\": \"P1363\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "43113a90-4209-4347-80d2-2f801e026ac0",
+          "name": "Poll request status / fetch the result",
+          "request": {
+            "name": "Poll request status / fetch the result",
+            "description": {
+              "content": "Readable with the provider's Basic credentials for every method, or with the request's\n`clientToken` for physical/NFC requests. Smart-ID/Mobile-ID providers poll this endpoint or\nconsume the terminal webhook.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "auth",
+                ":requestId"
+              ],
+              "host": [
+                "{{auth-requestId-Url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "requestId",
+                  "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basicAuthUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basicAuthPassword}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "c47d7236-3c86-4c14-b763-9f5857481bbc",
+              "name": "Current state.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId"
+                  ],
+                  "host": [
+                    "{{auth-requestId-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"requestId\": \"c260e44d-fb40-31b4-4dbf-74abe9f3ae1b\",\n  \"method\": \"physical\",\n  \"status\": \"certInvalid\",\n  \"verificationCode\": \"string\",\n  \"nonce\": \"string\",\n  \"cert\": {\n    \"subject\": {\n      \"serialNumber\": \"PNOLT-39001010000\",\n      \"givenName\": \"string\",\n      \"sn\": \"string\",\n      \"cn\": \"string\",\n      \"c\": \"LT\"\n    },\n    \"der\": \"string\"\n  },\n  \"sig\": \"string\",\n  \"assertion\": \"string\",\n  \"error\": {\n    \"code\": \"untrusted_chain\",\n    \"message\": \"string\",\n    \"requestId\": \"5a5b2835-893d-3713-4ff4-2e7c3493efef\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "d84bf060-679e-4ec0-ac52-5460b2c9aac5",
+              "name": "Missing/invalid credentials or client token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId"
+                  ],
+                  "host": [
+                    "{{auth-requestId-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "da0e5439-eb01-4c0c-a232-12d613a5d743",
+              "name": "Unknown request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId"
+                  ],
+                  "host": [
+                    "{{auth-requestId-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "a2044d2e-3fe6-4f7d-bb31-8b05a2faaa21",
+          "name": "Cancel a non-terminal request",
+          "request": {
+            "name": "Cancel a non-terminal request",
+            "description": {},
+            "url": {
+              "path": [
+                "auth",
+                ":requestId",
+                "cancel"
+              ],
+              "host": [
+                "{{auth-requestId-cancel-Url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "requestId",
+                  "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basicAuthUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basicAuthPassword}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "7d69829f-42ea-46b9-b0f7-e903b3df7895",
+              "name": "Cancelled.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "cancel"
+                  ],
+                  "host": [
+                    "{{auth-requestId-cancel-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"requestId\": \"c260e44d-fb40-31b4-4dbf-74abe9f3ae1b\",\n  \"method\": \"physical\",\n  \"status\": \"certInvalid\",\n  \"verificationCode\": \"string\",\n  \"nonce\": \"string\",\n  \"cert\": {\n    \"subject\": {\n      \"serialNumber\": \"PNOLT-39001010000\",\n      \"givenName\": \"string\",\n      \"sn\": \"string\",\n      \"cn\": \"string\",\n      \"c\": \"LT\"\n    },\n    \"der\": \"string\"\n  },\n  \"sig\": \"string\",\n  \"assertion\": \"string\",\n  \"error\": {\n    \"code\": \"untrusted_chain\",\n    \"message\": \"string\",\n    \"requestId\": \"5a5b2835-893d-3713-4ff4-2e7c3493efef\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "60079b27-dc8a-4164-9c28-0e229eeebd1b",
+              "name": "Unknown request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "cancel"
+                  ],
+                  "host": [
+                    "{{auth-requestId-cancel-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c7846423-f36a-4a33-b839-c3a0363a1139",
+              "name": "State/idempotency conflict (spent operation token, identity swap, terminal request).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "cancel"
+                  ],
+                  "host": [
+                    "{{auth-requestId-cancel-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_expired\",\n    \"message\": \"string\",\n    \"requestId\": \"e48ed213-7c39-7136-7685-443a6235bacc\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "baseUrl"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "auth-requests-Url"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "auth-requestId-certificate-Url"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "auth-requestId-complete-Url"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "auth-requestId-Url"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "auth-requestId-cancel-Url"
+    }
+  ],
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "username",
+        "value": "{{basicAuthUsername}}"
+      },
+      {
+        "key": "password",
+        "value": "{{basicAuthPassword}}"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "a7bda994-dc19-48aa-8585-52f7b7644f6f",
+    "name": "Tvarka Atk Auth API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Operations tagged Auth across 2 of this provider's published API definitions: tvarka-atk-api-auth-openapi.yaml, tvarka-atk-api-openapi-original.json. Each path carries the servers of the definition it was published in.",
+      "type": "text/plain"
+    }
+  }
+}

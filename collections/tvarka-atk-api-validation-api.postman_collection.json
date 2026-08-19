@@ -1,0 +1,578 @@
+{
+  "item": [
+    {
+      "id": "cbde2b68-fb55-4a78-bc09-dc4cf011e1b9",
+      "name": "Validation",
+      "description": {
+        "content": "Standalone advisory validation of signed artifacts.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "0c00cc93-e9e8-4e34-97eb-2b5101868624",
+          "name": "Validate an existing signed document or container",
+          "request": {
+            "name": "Validate an existing signed document or container",
+            "description": {
+              "content": "Paid-tier, Basic-authenticated synchronous service. SiVa backs PAdES/ASiC-E and can return\n`passed`/`failed`. ADOC runs Tvarka's internal STRUCTURAL inspector, which performs no\ncryptographic verification and therefore never returns `passed` - a structurally sound ADOC\nyields `status: structural`. The verdict is advisory, not a regulatory conclusion. A\nsuccessful service call emits exactly one `atk.validate` event. `Idempotency-Key` makes network\nretries replay the original response without a second event.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "validation"
+              ],
+              "host": [
+                "{{validation-Url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                "key": "Idempotency-Key",
+                "value": "<string>"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basicAuthUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basicAuthPassword}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"document\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "be127851-4f52-4f19-8b77-b88104dd7845",
+              "name": "Advisory validation result.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "validation"
+                  ],
+                  "host": [
+                    "{{validation-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"requestId\": \"2a403d19-3186-b50c-7662-286ad14978c7\",\n  \"status\": \"string\",\n  \"validation\": {\n    \"status\": \"failed\",\n    \"level\": \"string\",\n    \"policy\": \"aes\",\n    \"report\": {\n      \"key_0\": 5844.660640404522,\n      \"key_1\": 7322,\n      \"key_2\": \"string\"\n    }\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "64c317f0-6f59-4e5d-b6f8-8151ab3381bc",
+              "name": "Malformed input (e.g. container format without document, hash without raw).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "validation"
+                  ],
+                  "host": [
+                    "{{validation-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"3bf3ff80-1db2-26ba-d18e-ab8da8de4069\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b33557a3-5493-48cf-b85e-9b3232e35660",
+              "name": "Missing/invalid credentials or client token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "validation"
+                  ],
+                  "host": [
+                    "{{validation-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"3bf3ff80-1db2-26ba-d18e-ab8da8de4069\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "4f78d9d4-4836-43ea-91b3-2e751b68ecad",
+              "name": "Format not allowed / origin not allowed / tenant suspended.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "validation"
+                  ],
+                  "host": [
+                    "{{validation-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"3bf3ff80-1db2-26ba-d18e-ab8da8de4069\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "f0152c86-264f-46b3-b681-4c0c2919de6f",
+              "name": "Spent operation token, identity swap, terminal request, or idempotency conflict/in-progress operation.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "validation"
+                  ],
+                  "host": [
+                    "{{validation-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"3bf3ff80-1db2-26ba-d18e-ab8da8de4069\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "45e2ff90-432f-4fd5-a137-85582ba65245",
+              "name": "Document exceeds the tenant's max size.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "validation"
+                  ],
+                  "host": [
+                    "{{validation-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Request Entity Too Large",
+              "code": 413,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"3bf3ff80-1db2-26ba-d18e-ab8da8de4069\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "426fd9de-bb00-4a84-be52-1b3e1c7af686",
+              "name": "Too many requests.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "validation"
+                  ],
+                  "host": [
+                    "{{validation-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "key": "Retry-After",
+                  "value": "5551",
+                  "description": ""
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"3bf3ff80-1db2-26ba-d18e-ab8da8de4069\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "7a0a3ac6-cf49-4cb1-b2fd-db633e5c8ab4",
+              "name": "Validation/TSA/revocation dependency failed transiently; retry with the same Idempotency-Key.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "validation"
+                  ],
+                  "host": [
+                    "{{validation-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "disabled": false,
+                    "description": "(Required) 1-255 visible characters; scoped to provider + service operation.",
+                    "key": "Idempotency-Key",
+                    "value": "<string>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"request_terminal\",\n    \"message\": \"string\",\n    \"requestId\": \"3bf3ff80-1db2-26ba-d18e-ab8da8de4069\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "baseUrl"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "validation-Url"
+    }
+  ],
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "username",
+        "value": "{{basicAuthUsername}}"
+      },
+      {
+        "key": "password",
+        "value": "{{basicAuthPassword}}"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "b7123ff2-b881-4d50-883d-4f05beec2c95",
+    "name": "Tvarka Atk Validation API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Operations tagged Validation across 2 of this provider's published API definitions: tvarka-atk-api-openapi-original.json, tvarka-atk-api-sign-openapi.yaml. Each path carries the servers of the definition it was published in.",
+      "type": "text/plain"
+    }
+  }
+}

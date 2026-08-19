@@ -1,0 +1,36 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Tvarka Atk Well Known API",
+    "version": "1.3.0"
+  },
+  "request": {
+    "auth": {
+      "type": "basic",
+      "username": "{{username}}",
+      "password": "{{password}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Well-known",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "JWKS for verifying the optional `assertion` JWT",
+            "type": "http"
+          },
+          "http": {
+            "method": "GET",
+            "url": "https://atk.tvarka.pro/v1/.well-known/atk-jwks.json"
+          },
+          "docs": "Public keys (by `kid`) for the ES256 signer. Rotation keeps current + previous keys published so\nin-flight assertions verify.\n"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

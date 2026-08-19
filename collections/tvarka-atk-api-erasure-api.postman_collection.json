@@ -1,0 +1,650 @@
+{
+  "item": [
+    {
+      "id": "c13a9e89-e630-43a3-a9f2-c83227a5add0",
+      "name": "Erasure",
+      "description": {
+        "content": "",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "23948275-956a-439a-b302-bde4db1275ab",
+          "name": "Erase one request on demand (GDPR)",
+          "request": {
+            "name": "Erase one request on demand (GDPR)",
+            "description": {
+              "content": "Basic only, scoped to the caller's own provider. A non-terminal request is cancelled first,\nthen its document/result bytes + derived personal data are purged (exactly what the retention\njob strips); a de-identified audit row remains. Idempotent.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "auth",
+                ":requestId",
+                "delete"
+              ],
+              "host": [
+                "{{auth-requestId-delete-Url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "requestId",
+                  "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basicAuthUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basicAuthPassword}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "f43194a0-dc8f-4a3a-9b6e-b3949bb959a4",
+              "name": "Erased.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "delete"
+                  ],
+                  "host": [
+                    "{{auth-requestId-delete-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"requestId\": \"bb6eff42-cc04-120e-e614-1324388fd855\",\n  \"deleted\": false\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "f69933ca-3ca1-4124-bfde-97443aa83968",
+              "name": "Unknown request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "delete"
+                  ],
+                  "host": [
+                    "{{auth-requestId-delete-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_already_claimed\",\n    \"message\": \"string\",\n    \"requestId\": \"fab1d496-d74a-f598-3a22-05b7a70aa6db\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "8ea8fa51-50fc-4460-bdaa-6c98fec25ac7",
+          "name": "Bulk-erase the provider's terminal requests (GDPR)",
+          "request": {
+            "name": "Bulk-erase the provider's terminal requests (GDPR)",
+            "description": {
+              "content": "Basic only. Purges document/result bytes + derived personal data of every TERMINAL,\nnot-yet-purged request of the calling provider (auth and sign alike); optional `before`\n(ISO-8601) restricts to requests last updated before that moment. In-flight requests are\nleft untouched - erase them individually if intended.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "erasure"
+              ],
+              "host": [
+                "{{erasure-Url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basicAuthUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basicAuthPassword}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"before\": \"<dateTime>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "7afccad6-9b7e-47e2-b710-247801efbfe4",
+              "name": "Erasure summary.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "erasure"
+                  ],
+                  "host": [
+                    "{{erasure-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"before\": \"<dateTime>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"purged\": 4608,\n  \"failed\": 3839\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "148f8367-2152-4932-9057-4ade46dd1ac8",
+              "name": "Malformed input.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "erasure"
+                  ],
+                  "host": [
+                    "{{erasure-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"before\": \"<dateTime>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_already_claimed\",\n    \"message\": \"string\",\n    \"requestId\": \"fab1d496-d74a-f598-3a22-05b7a70aa6db\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c5bce144-ec52-4365-a1bb-6b56f845b6ff",
+              "name": "Missing/invalid credentials or client token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "erasure"
+                  ],
+                  "host": [
+                    "{{erasure-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"before\": \"<dateTime>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_already_claimed\",\n    \"message\": \"string\",\n    \"requestId\": \"fab1d496-d74a-f598-3a22-05b7a70aa6db\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "349bb651-4e18-42ab-9a3d-a316c651b4d6",
+              "name": "A required remote or erasure service is temporarily unavailable.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "erasure"
+                  ],
+                  "host": [
+                    "{{erasure-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"before\": \"<dateTime>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_already_claimed\",\n    \"message\": \"string\",\n    \"requestId\": \"fab1d496-d74a-f598-3a22-05b7a70aa6db\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "a2b3b457-d562-4aaf-a02b-9847f6cc4163",
+          "name": "Erase one request on demand (GDPR)",
+          "request": {
+            "name": "Erase one request on demand (GDPR)",
+            "description": {
+              "content": "Basic only, scoped to the caller's own provider. A non-terminal request is cancelled first,\nthen its document/container bytes + derived personal data are purged (exactly what the\nretention job strips); a de-identified audit row remains. Idempotent. Bulk erasure lives on\nthe base API (`POST /v1/erasure`) and covers sign requests too.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "sign",
+                ":requestId",
+                "delete"
+              ],
+              "host": [
+                "{{sign-requestId-delete-Url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "requestId",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basicAuthUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basicAuthPassword}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "d156bcf4-c039-4144-9c3e-ba90a12b2af3",
+              "name": "Erased.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "delete"
+                  ],
+                  "host": [
+                    "{{sign-requestId-delete-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"requestId\": \"bb6eff42-cc04-120e-e614-1324388fd855\",\n  \"deleted\": false\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "03c6fdb7-9c97-4fe3-a8f3-945f6b9810bd",
+              "name": "Unknown request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "delete"
+                  ],
+                  "host": [
+                    "{{sign-requestId-delete-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_already_claimed\",\n    \"message\": \"string\",\n    \"requestId\": \"fab1d496-d74a-f598-3a22-05b7a70aa6db\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "baseUrl"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "auth-requestId-delete-Url"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "erasure-Url"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "sign-requestId-delete-Url"
+    }
+  ],
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "username",
+        "value": "{{basicAuthUsername}}"
+      },
+      {
+        "key": "password",
+        "value": "{{basicAuthPassword}}"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "a4bc371f-823a-4128-a9bc-af4c64d485d7",
+    "name": "Tvarka Atk Erasure API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Operations tagged Erasure across 3 of this provider's published API definitions: tvarka-atk-api-auth-openapi.yaml, tvarka-atk-api-openapi-original.json, tvarka-atk-api-sign-openapi.yaml. Each path carries the servers of the definition it was published in.",
+      "type": "text/plain"
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Tvarka Atk Validation API",
+    "version": "1.3.0"
+  },
+  "request": {
+    "auth": {
+      "type": "basic",
+      "username": "{{username}}",
+      "password": "{{password}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Validation",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Validate an existing signed document or container",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://atk.tvarka.pro/v1/validation",
+            "headers": [
+              {
+                "name": "Idempotency-Key",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            },
+            "auth": {
+              "type": "basic",
+              "username": "{{username}}",
+              "password": "{{password}}"
+            }
+          },
+          "docs": "Paid-tier, Basic-authenticated synchronous service. SiVa backs PAdES/ASiC-E and can return\n`passed`/`failed`. ADOC runs Tvarka's internal STRUCTURAL inspector, which performs no\ncryptographic verification and therefore never returns `passed` - a structurally sound ADOC\nyields `status: structural`. The verdict is advisory, not a regulatory conclusion. A\nsuccessful service call emits exactly one `atk.validate` event. `Idempotency-Key` makes network\nretries replay the original response without a se"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

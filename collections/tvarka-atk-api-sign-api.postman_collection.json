@@ -1,0 +1,2430 @@
+{
+  "item": [
+    {
+      "id": "56b3c554-5763-42b9-94d1-995eb38f9e7d",
+      "name": "Sign",
+      "description": {
+        "content": "The QES signing ceremony (`/v1/sign/*`).",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "e0551ff7-5253-47c2-ac05-2126c77580ce",
+          "name": "Create a signing request (server-to-server)",
+          "request": {
+            "name": "Create a signing request (server-to-server)",
+            "description": {
+              "content": "HTTP Basic. Provide the document one of three ways - inline `document` (base64), an allow-listed\n`documentRef`, or a bare `hash` (only for `format:\"raw\"`). Container formats\n(pades/asice/adoc) require exactly one of `document` or `documentRef`. PAdES accepts an unsigned\nor already-signed PDF; ASiC-E/ADOC accept either a PDF (Tvarka constructs a new single-payload\ncontainer) or an existing valid container, which is treated as an opaque whole and receives one\nadditional signature without payload or attachment edits. Physical requests return a client\ntoken, NFC returns a pairing hint, and Smart-ID/Mobile-ID return a user verification code.\nRemote methods are PAdES-only and stay server-side.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "sign",
+                "requests"
+              ],
+              "host": [
+                "{{sign-requests-Url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basicAuthUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basicAuthPassword}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"format\": {},\n  \"method\": \"<string>\",\n  \"hash\": \"<byte>\",\n  \"hashAlgOid\": \"<string>\",\n  \"filename\": \"<string>\",\n  \"mimeType\": \"<string>\",\n  \"message\": \"<string>\",\n  \"externalId\": \"<string>\",\n  \"webhookUrl\": \"<uri>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "602435e4-4fcf-4406-a117-aa580a9c7bb9",
+              "name": "Request created; awaiting the ATK client or remote user authorization.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    "requests"
+                  ],
+                  "host": [
+                    "{{sign-requests-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"format\": \"pades\",\n  \"method\": \"physical\",\n  \"document\": \"JVBERi0xLjQK\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Accepted",
+              "code": 202,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"requestId\": \"9b56f941-b868-946f-4392-793169f3ac58\",\n  \"method\": \"physical\",\n  \"verificationCode\": \"string\",\n  \"status\": \"pending\",\n  \"expiresAt\": \"1954-02-02T23:52:11.617Z\",\n  \"clientToken\": \"string\",\n  \"pairing\": {\n    \"pairingUrl\": \"https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN\",\n    \"deepLink\": \"tvarkasign://atk/pair/PAIRING_TOKEN\",\n    \"qrPayload\": \"https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "2115bbff-2522-4452-91f4-bf056096af5d",
+              "name": "Malformed input (e.g. container format without document, hash without raw).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    "requests"
+                  ],
+                  "host": [
+                    "{{sign-requests-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"format\": \"pades\",\n  \"method\": \"physical\",\n  \"document\": \"JVBERi0xLjQK\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "754d43d7-c4dc-4152-bb2d-a8caed8b6d46",
+              "name": "Missing/invalid credentials or client token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    "requests"
+                  ],
+                  "host": [
+                    "{{sign-requests-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"format\": \"pades\",\n  \"method\": \"physical\",\n  \"document\": \"JVBERi0xLjQK\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "65d7b2bd-1585-4194-b3c4-1b25955b635d",
+              "name": "Format not allowed / origin not allowed / tenant suspended.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    "requests"
+                  ],
+                  "host": [
+                    "{{sign-requests-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"format\": \"pades\",\n  \"method\": \"physical\",\n  \"document\": \"JVBERi0xLjQK\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "027519bc-47e3-4b58-92c4-180dc431bf7f",
+              "name": "Document exceeds the tenant's max size.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    "requests"
+                  ],
+                  "host": [
+                    "{{sign-requests-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"format\": \"pades\",\n  \"method\": \"physical\",\n  \"document\": \"JVBERi0xLjQK\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Request Entity Too Large",
+              "code": 413,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "cc404e47-eaa9-4f04-8334-245323db5185",
+              "name": "Too many requests.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    "requests"
+                  ],
+                  "host": [
+                    "{{sign-requests-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"format\": \"pades\",\n  \"method\": \"physical\",\n  \"document\": \"JVBERi0xLjQK\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "key": "Retry-After",
+                  "value": "7882",
+                  "description": ""
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "1f986d08-259f-43e8-93ac-37ec72ba45ff",
+              "name": "Validation/TSA/revocation dependency failed transiently; retry with the same Idempotency-Key.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    "requests"
+                  ],
+                  "host": [
+                    "{{sign-requests-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"format\": \"pades\",\n  \"method\": \"physical\",\n  \"document\": \"JVBERi0xLjQK\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Service Unavailable",
+              "code": 503,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "5a1ba678-9b3e-4464-b8b3-80549dabce5c",
+          "name": "Submit the card's signing certificate; receive the DTBS",
+          "request": {
+            "name": "Submit the card's signing certificate; receive the DTBS",
+            "description": {
+              "content": "Bearer clientToken. The API validates the certificate (chain, revocation, purpose =\nsigning/content-commitment, qualified/QSCD evidence), prepares the format-specific DTBS (for\nPAdES - the SHA-256 CAdES SignedAttributes digest; SHA-256 for both key curves), and returns\nit + `operationToken`. Physical/NFC only.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "sign",
+                ":requestId",
+                "certificate"
+              ],
+              "host": [
+                "{{sign-requestId-certificate-Url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "requestId",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"certificate\": \"<byte>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "60c7d18e-7dbc-4d2e-bb12-e44774f0c109",
+              "name": "DTBS + operation token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "certificate"
+                  ],
+                  "host": [
+                    "{{sign-requestId-certificate-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"certificate\": \"<byte>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"requestId\": \"371b0cc9-58d6-02fa-71c5-c24f43d991cc\",\n  \"dtbs\": \"string\",\n  \"dtbsHashAlgOid\": \"<string>\",\n  \"operationToken\": \"string\",\n  \"cert\": {\n    \"subject\": {\n      \"serialNumber\": \"PNOLT-39001010000\",\n      \"givenName\": \"string\",\n      \"sn\": \"string\",\n      \"cn\": \"string\",\n      \"c\": \"LT\"\n    }\n  },\n  \"signing\": {\n    \"format\": \"adoc\",\n    \"signatureEncodingHints\": \"string\"\n  },\n  \"verificationCode\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "4304eb53-9d45-4559-8fac-7e65e4db38bc",
+              "name": "Missing/invalid credentials or client token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "certificate"
+                  ],
+                  "host": [
+                    "{{sign-requestId-certificate-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"certificate\": \"<byte>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "94ae0d43-0e2d-4ecd-ac84-f618b7c7eb3a",
+              "name": "Format not allowed / origin not allowed / tenant suspended.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "certificate"
+                  ],
+                  "host": [
+                    "{{sign-requestId-certificate-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"certificate\": \"<byte>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "1372474d-240c-423e-a58b-e7186c75aef9",
+              "name": "Unknown request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "certificate"
+                  ],
+                  "host": [
+                    "{{sign-requestId-certificate-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"certificate\": \"<byte>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "2a368c78-0574-45f3-8a9f-1488a78f922b",
+              "name": "Spent operation token, identity swap, terminal request, or idempotency conflict/in-progress operation.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "certificate"
+                  ],
+                  "host": [
+                    "{{sign-requestId-certificate-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"certificate\": \"<byte>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "051d9d49-d573-449b-a38d-193e09bbf8f1",
+              "name": "Cert purpose/chain/revocation/qualified reject, dtbs mismatch, bad signature, doc hash mismatch.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "certificate"
+                  ],
+                  "host": [
+                    "{{sign-requestId-certificate-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"certificate\": \"<byte>\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "70fedc3b-7d4d-498d-89ac-905bfd38e880",
+          "name": "Submit the raw card signature; assemble the container",
+          "request": {
+            "name": "Submit the raw card signature; assemble the container",
+            "description": {
+              "content": "Bearer clientToken + single-use `operationToken`. Synchronous: the API verifies the signature\nagainst the stored DTBS + cert, assembles + timestamps the AdES container inline, schedules\nasync validation, and returns `200 done` with `validation:{status:\"pending\"}` (or\n`notApplicable` in sandbox/raw, or the internal ADOC verdict). `finalizing` is observable via\nGET only if a crash wedges the request until the reaper releases it. Retry-safe; a transient\nassembly failure returns a retryable 5xx with the operation released; one `atk.sign` charge\nat `done`. Physical/NFC only; remote methods complete asynchronously.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "sign",
+                ":requestId",
+                "complete"
+              ],
+              "host": [
+                "{{sign-requestId-complete-Url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "requestId",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"signature\": \"<byte>\",\n  \"signatureAlgorithm\": \"<string>\",\n  \"operationToken\": \"<string>\",\n  \"signatureEncoding\": \"P1363\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "8c3b868c-0b53-4ebd-8daf-658119d6b85d",
+              "name": "Done - container assembled + signature verified.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "complete"
+                  ],
+                  "host": [
+                    "{{sign-requestId-complete-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"signature\": \"<byte>\",\n  \"signatureAlgorithm\": \"<string>\",\n  \"operationToken\": \"<string>\",\n  \"signatureEncoding\": \"P1363\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"string\",\n  \"method\": \"physical\",\n  \"validation\": {\n    \"status\": \"passed\",\n    \"level\": \"string\",\n    \"report\": \"string\"\n  },\n  \"cert\": {\n    \"subject\": {\n      \"serialNumber\": \"PNOLT-39001010000\",\n      \"givenName\": \"string\",\n      \"sn\": \"string\",\n      \"cn\": \"string\",\n      \"c\": \"LT\"\n    }\n  },\n  \"sig\": \"string\",\n  \"sigAlgOid\": \"string\",\n  \"downloadToken\": \"string\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ad18a7e4-df2b-4409-b085-3bbd22dccce0",
+              "name": "Missing/invalid credentials or client token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "complete"
+                  ],
+                  "host": [
+                    "{{sign-requestId-complete-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"signature\": \"<byte>\",\n  \"signatureAlgorithm\": \"<string>\",\n  \"operationToken\": \"<string>\",\n  \"signatureEncoding\": \"P1363\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6e438d96-9e27-4567-bd79-be9094762cbf",
+              "name": "Unknown request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "complete"
+                  ],
+                  "host": [
+                    "{{sign-requestId-complete-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"signature\": \"<byte>\",\n  \"signatureAlgorithm\": \"<string>\",\n  \"operationToken\": \"<string>\",\n  \"signatureEncoding\": \"P1363\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5e3b5e40-59e4-43a3-8fc5-62214b34050f",
+              "name": "Spent operation token, identity swap, terminal request, or idempotency conflict/in-progress operation.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "complete"
+                  ],
+                  "host": [
+                    "{{sign-requestId-complete-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"signature\": \"<byte>\",\n  \"signatureAlgorithm\": \"<string>\",\n  \"operationToken\": \"<string>\",\n  \"signatureEncoding\": \"P1363\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "4de0f5bc-b163-4671-a3a0-a2f40f4b5875",
+              "name": "Cert purpose/chain/revocation/qualified reject, dtbs mismatch, bad signature, doc hash mismatch.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "complete"
+                  ],
+                  "host": [
+                    "{{sign-requestId-complete-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"signature\": \"<byte>\",\n  \"signatureAlgorithm\": \"<string>\",\n  \"operationToken\": \"<string>\",\n  \"signatureEncoding\": \"P1363\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "003e336d-6d57-4ddb-a60f-7474efbb81fb",
+          "name": "Poll status + validation axis; fetch the result",
+          "request": {
+            "name": "Poll status + validation axis; fetch the result",
+            "description": {},
+            "url": {
+              "path": [
+                "sign",
+                ":requestId"
+              ],
+              "host": [
+                "{{sign-requestId-Url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "requestId",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basicAuthUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basicAuthPassword}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "4acaa387-5694-4c8d-9f5e-b6e41d4e6cc7",
+              "name": "Current state.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId"
+                  ],
+                  "host": [
+                    "{{sign-requestId-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"requestId\": \"df2b8798-65d5-67bc-7233-06396b2d52c7\",\n  \"method\": \"physical\",\n  \"status\": \"deviceError\",\n  \"verificationCode\": \"string\",\n  \"validation\": {\n    \"status\": \"failed\",\n    \"level\": \"string\",\n    \"report\": \"string\"\n  },\n  \"cert\": {\n    \"subject\": {\n      \"serialNumber\": \"PNOLT-39001010000\",\n      \"givenName\": \"string\",\n      \"sn\": \"string\",\n      \"cn\": \"string\",\n      \"c\": \"LT\"\n    }\n  },\n  \"sig\": \"string\",\n  \"sigAlgOid\": \"string\",\n  \"downloadToken\": \"string\",\n  \"error\": {\n    \"code\": \"signature_invalid\",\n    \"message\": \"string\",\n    \"requestId\": \"2dd8f8ed-8e0c-5640-d621-712d4a363bcc\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "beda5a63-5c18-4b1f-9d7e-d4ae862b98c5",
+              "name": "Missing/invalid credentials or client token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId"
+                  ],
+                  "host": [
+                    "{{sign-requestId-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "ba28cf7c-595f-4b07-877a-863542eaa997",
+              "name": "Unknown request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId"
+                  ],
+                  "host": [
+                    "{{sign-requestId-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "981b6cd9-7f61-4d7f-93da-9f4fba06f779",
+          "name": "Download the signed container",
+          "request": {
+            "name": "Download the signed container",
+            "description": {
+              "content": "Authorized by the provider's Basic credentials or a `downloadToken` query param.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "sign",
+                ":requestId",
+                "document"
+              ],
+              "host": [
+                "{{sign-requestId-document-Url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "requestId",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/octet-stream"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basicAuthUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basicAuthPassword}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "d7369eb1-609c-4271-b9d0-ed28f2c22bcf",
+              "name": "The signed container bytes.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "document"
+                  ],
+                  "host": [
+                    "{{sign-requestId-document-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/octet-stream"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "body": "string",
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "3af6d4df-b92e-460c-ac50-c0b3ecfd23d2",
+              "name": "Missing/invalid credentials or client token.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "document"
+                  ],
+                  "host": [
+                    "{{sign-requestId-document-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "3340e1b2-9ed2-4681-a9e4-3a358a7358b7",
+              "name": "Unknown request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "document"
+                  ],
+                  "host": [
+                    "{{sign-requestId-document-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "1c076396-5e26-444b-88d0-19c327e04b9d",
+          "name": "Cancel a non-terminal request",
+          "request": {
+            "name": "Cancel a non-terminal request",
+            "description": {},
+            "url": {
+              "path": [
+                "sign",
+                ":requestId",
+                "cancel"
+              ],
+              "host": [
+                "{{sign-requestId-cancel-Url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "requestId",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basicAuthUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basicAuthPassword}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "9fbb8e88-c7bb-496b-be43-7e227a06221b",
+              "name": "Cancelled.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "cancel"
+                  ],
+                  "host": [
+                    "{{sign-requestId-cancel-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"requestId\": \"df2b8798-65d5-67bc-7233-06396b2d52c7\",\n  \"method\": \"physical\",\n  \"status\": \"deviceError\",\n  \"verificationCode\": \"string\",\n  \"validation\": {\n    \"status\": \"failed\",\n    \"level\": \"string\",\n    \"report\": \"string\"\n  },\n  \"cert\": {\n    \"subject\": {\n      \"serialNumber\": \"PNOLT-39001010000\",\n      \"givenName\": \"string\",\n      \"sn\": \"string\",\n      \"cn\": \"string\",\n      \"c\": \"LT\"\n    }\n  },\n  \"sig\": \"string\",\n  \"sigAlgOid\": \"string\",\n  \"downloadToken\": \"string\",\n  \"error\": {\n    \"code\": \"signature_invalid\",\n    \"message\": \"string\",\n    \"requestId\": \"2dd8f8ed-8e0c-5640-d621-712d4a363bcc\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "dd48caaa-afac-48ee-8b4a-ed39e0c84a4d",
+              "name": "Unknown request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "cancel"
+                  ],
+                  "host": [
+                    "{{sign-requestId-cancel-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "2527ceb5-df7f-4c4a-a110-7fd3d643be0a",
+              "name": "Spent operation token, identity swap, terminal request, or idempotency conflict/in-progress operation.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "cancel"
+                  ],
+                  "host": [
+                    "{{sign-requestId-cancel-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {}
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "4f361dcb-e2e2-48ce-bfac-1aa6f7dce268",
+          "name": "Rotate and return the NFC pairing token for a sign request",
+          "request": {
+            "name": "Rotate and return the NFC pairing token for a sign request",
+            "description": {},
+            "url": {
+              "path": [
+                "sign",
+                ":requestId",
+                "pairing"
+              ],
+              "host": [
+                "{{sign-requestId-pairing-Url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "requestId",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basicAuthUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basicAuthPassword}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "f81afb85-9405-4931-a1e7-48f1a81e063d",
+              "name": "Newly rotated pairing token and links.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "pairing"
+                  ],
+                  "host": [
+                    "{{sign-requestId-pairing-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"pairingToken\": \"string\",\n  \"expiresAt\": \"2012-12-23T03:21:06.910Z\",\n  \"pairingUrl\": \"https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN\",\n  \"deepLink\": \"tvarkasign://atk/pair/PAIRING_TOKEN\",\n  \"qrPayload\": \"https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "19136392-3f37-4ba1-abe4-478e75a42e5c",
+              "name": "Unknown request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "pairing"
+                  ],
+                  "host": [
+                    "{{sign-requestId-pairing-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "5937d09e-00d1-470f-8fb2-da2bc9ef7f3b",
+              "name": "Spent operation token, identity swap, terminal request, or idempotency conflict/in-progress operation.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "sign",
+                    ":requestId",
+                    "pairing"
+                  ],
+                  "host": [
+                    "{{sign-requestId-pairing-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) "
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "26bab62a-cb54-435c-9a25-c095daf1f5ff",
+          "name": "Atomically claim an auth or sign NFC pairing",
+          "request": {
+            "name": "Atomically claim an auth or sign NFC pairing",
+            "description": {},
+            "url": {
+              "path": [
+                "pairing",
+                "claim"
+              ],
+              "host": [
+                "{{pairing-claim-Url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pairingToken\": \"<string>\",\n  \"claimNonce\": \"<string>\",\n  \"device\": {\n    \"platform\": \"<string>\",\n    \"appVersion\": \"<string>\",\n    \"deviceName\": \"<string>\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "7ef20c95-9f16-4815-be9b-40433a2f2364",
+              "name": "Request-scoped client token for the phone.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "pairing",
+                    "claim"
+                  ],
+                  "host": [
+                    "{{pairing-claim-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pairingToken\": \"<string>\",\n  \"claimNonce\": \"<string>\",\n  \"device\": {\n    \"platform\": \"<string>\",\n    \"appVersion\": \"<string>\",\n    \"deviceName\": \"<string>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"requestId\": \"a9fe66c9-f846-e990-b453-df928c9c11ac\",\n  \"purpose\": \"auth\",\n  \"clientToken\": \"string\",\n  \"status\": \"certInvalid\",\n  \"expiresAt\": \"1973-02-18T09:39:07.288Z\",\n  \"verificationCode\": \"string\",\n  \"summary\": {\n    \"key_0\": 118.6845492144395,\n    \"key_1\": \"string\",\n    \"key_2\": 5888.337695172387\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "d00d5b59-3e9e-4c72-a083-78a84579fceb",
+              "name": "Unknown request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "pairing",
+                    "claim"
+                  ],
+                  "host": [
+                    "{{pairing-claim-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pairingToken\": \"<string>\",\n  \"claimNonce\": \"<string>\",\n  \"device\": {\n    \"platform\": \"<string>\",\n    \"appVersion\": \"<string>\",\n    \"deviceName\": \"<string>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6d95ca51-5964-4902-af7b-db9150be61ff",
+              "name": "Spent operation token, identity swap, terminal request, or idempotency conflict/in-progress operation.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "pairing",
+                    "claim"
+                  ],
+                  "host": [
+                    "{{pairing-claim-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pairingToken\": \"<string>\",\n  \"claimNonce\": \"<string>\",\n  \"device\": {\n    \"platform\": \"<string>\",\n    \"appVersion\": \"<string>\",\n    \"deviceName\": \"<string>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "23ec7edc-f806-4aac-99b7-cc926d17db4c",
+              "name": "Too many requests.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "pairing",
+                    "claim"
+                  ],
+                  "host": [
+                    "{{pairing-claim-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pairingToken\": \"<string>\",\n  \"claimNonce\": \"<string>\",\n  \"device\": {\n    \"platform\": \"<string>\",\n    \"appVersion\": \"<string>\",\n    \"deviceName\": \"<string>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "key": "Retry-After",
+                  "value": "7882",
+                  "description": ""
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"cert_purpose_mismatch\",\n    \"message\": \"string\",\n    \"requestId\": \"c1e2eac9-2440-66a1-975a-48c9c95d1ea1\",\n    \"retryable\": true\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "baseUrl"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "sign-requests-Url"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "sign-requestId-certificate-Url"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "sign-requestId-complete-Url"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "sign-requestId-Url"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "sign-requestId-document-Url"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "sign-requestId-cancel-Url"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "sign-requestId-pairing-Url"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "pairing-claim-Url"
+    }
+  ],
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "username",
+        "value": "{{basicAuthUsername}}"
+      },
+      {
+        "key": "password",
+        "value": "{{basicAuthPassword}}"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "a03a24f2-e092-4542-9535-c83688bf6345",
+    "name": "Tvarka Atk Sign API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Operations tagged Sign across 2 of this provider's published API definitions: tvarka-atk-api-openapi-original.json, tvarka-atk-api-sign-openapi.yaml. Each path carries the servers of the definition it was published in.",
+      "type": "text/plain"
+    }
+  }
+}

@@ -1,0 +1,534 @@
+{
+  "item": [
+    {
+      "id": "1601c441-d64f-455e-a3cc-0ce8cb9593aa",
+      "name": "Pairing",
+      "description": {
+        "content": "NFC remote pairing - complete a request by tapping a card on a different device.",
+        "type": "text/plain"
+      },
+      "item": [
+        {
+          "id": "e7095b09-fa48-4dfb-a084-e66da348ae7e",
+          "name": "Get a pairing token/QR to complete this request on a phone",
+          "request": {
+            "name": "Get a pairing token/QR to complete this request on a phone",
+            "description": {
+              "content": "Only for `method:\"nfc\"`. Basic only - the integrator's server rotates the one-time token.\nReturns a high-entropy, short-lived, one-claim pairing token and a deep link / QR the phone\nscans. The phone then calls `/pairing/claim`, receives the request's `clientToken`, and\ndrives the same `/certificate` + `/complete` endpoints.\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "auth",
+                ":requestId",
+                "pairing"
+              ],
+              "host": [
+                "{{auth-requestId-pairing-Url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<uuid>",
+                  "key": "requestId",
+                  "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{basicAuthUsername}}"
+                },
+                {
+                  "key": "password",
+                  "value": "{{basicAuthPassword}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "6d4c9d59-125c-4274-8777-ca947f753909",
+              "name": "Pairing payload.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "pairing"
+                  ],
+                  "host": [
+                    "{{auth-requestId-pairing-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"pairingToken\": \"string\",\n  \"expiresAt\": \"2001-06-05T16:56:29.821Z\",\n  \"pairingUrl\": \"https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN\",\n  \"deepLink\": \"tvarkasign://atk/pair/PAIRING_TOKEN\",\n  \"qrPayload\": \"https://sign.tvarka.pro/atk-login/#PAIRING_TOKEN\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "d2c3d3ee-e47c-47d1-b093-253b212260d3",
+              "name": "Unknown request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "pairing"
+                  ],
+                  "host": [
+                    "{{auth-requestId-pairing-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_not_available\",\n    \"message\": \"string\",\n    \"requestId\": \"104a300c-2479-f21b-fa7a-d1cc2eda48b5\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "0ad473d7-78cb-42f4-9404-c78320d4f663",
+              "name": "State/idempotency conflict (spent operation token, identity swap, terminal request).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "auth",
+                    ":requestId",
+                    "pairing"
+                  ],
+                  "host": [
+                    "{{auth-requestId-pairing-Url}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "type": "any",
+                      "value": "<uuid>",
+                      "key": "requestId",
+                      "description": "(Required) The `requestId` returned by `POST /auth/requests`."
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_not_available\",\n    \"message\": \"string\",\n    \"requestId\": \"104a300c-2479-f21b-fa7a-d1cc2eda48b5\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "2627c1b8-489d-405e-bb04-858032dff047",
+          "name": "Claim a pairing token from the tapping phone",
+          "request": {
+            "name": "Claim a pairing token from the tapping phone",
+            "description": {
+              "content": "No Basic auth - authorized solely by the high-entropy `pairingToken`. One-claim, rate-limited,\nstored hashed. Returns the request's `clientToken` and a minimal `summary` (purpose + label\nonly, never document contents).\n",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "pairing",
+                "claim"
+              ],
+              "host": [
+                "{{pairing-claim-Url}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "auth": null,
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pairingToken\": \"<string>\",\n  \"claimNonce\": \"<string>\",\n  \"device\": {\n    \"platform\": \"<string>\",\n    \"appVersion\": \"<string>\",\n    \"deviceName\": \"<string>\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "id": "8645c5c1-5619-42ec-ab6f-769d6d252d18",
+              "name": "Claimed.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "pairing",
+                    "claim"
+                  ],
+                  "host": [
+                    "{{pairing-claim-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pairingToken\": \"<string>\",\n  \"claimNonce\": \"<string>\",\n  \"device\": {\n    \"platform\": \"<string>\",\n    \"appVersion\": \"<string>\",\n    \"deviceName\": \"<string>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"requestId\": \"be796861-3756-9b3c-8831-5dfea78a8fab\",\n  \"purpose\": \"sign\",\n  \"clientToken\": \"string\",\n  \"status\": \"certInvalid\",\n  \"summary\": {\n    \"key_0\": 4424,\n    \"key_1\": 4235\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "1d244ee0-6615-470f-b408-17cee2d56a03",
+              "name": "Unknown request.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "pairing",
+                    "claim"
+                  ],
+                  "host": [
+                    "{{pairing-claim-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pairingToken\": \"<string>\",\n  \"claimNonce\": \"<string>\",\n  \"device\": {\n    \"platform\": \"<string>\",\n    \"appVersion\": \"<string>\",\n    \"deviceName\": \"<string>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_not_available\",\n    \"message\": \"string\",\n    \"requestId\": \"104a300c-2479-f21b-fa7a-d1cc2eda48b5\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "1f76afc1-0114-4f15-b23a-6bf538d5cf08",
+              "name": "State/idempotency conflict (spent operation token, identity swap, terminal request).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "pairing",
+                    "claim"
+                  ],
+                  "host": [
+                    "{{pairing-claim-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pairingToken\": \"<string>\",\n  \"claimNonce\": \"<string>\",\n  \"device\": {\n    \"platform\": \"<string>\",\n    \"appVersion\": \"<string>\",\n    \"deviceName\": \"<string>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_not_available\",\n    \"message\": \"string\",\n    \"requestId\": \"104a300c-2479-f21b-fa7a-d1cc2eda48b5\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c0fd3747-c75a-4f27-94ac-fe35acb172ac",
+              "name": "Too many requests.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "pairing",
+                    "claim"
+                  ],
+                  "host": [
+                    "{{pairing-claim-Url}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: basic",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Basic <credentials>"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pairingToken\": \"<string>\",\n  \"claimNonce\": \"<string>\",\n  \"device\": {\n    \"platform\": \"<string>\",\n    \"appVersion\": \"<string>\",\n    \"deviceName\": \"<string>\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "disabled": false,
+                  "description": "Seconds.",
+                  "key": "Retry-After",
+                  "value": "8151"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"error\": {\n    \"code\": \"pairing_not_available\",\n    \"message\": \"string\",\n    \"requestId\": \"104a300c-2479-f21b-fa7a-d1cc2eda48b5\",\n    \"retryable\": false\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ],
+      "event": []
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "baseUrl"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "auth-requestId-pairing-Url"
+    },
+    {
+      "type": "string",
+      "value": "https://atk.tvarka.pro/v1",
+      "key": "pairing-claim-Url"
+    }
+  ],
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "username",
+        "value": "{{basicAuthUsername}}"
+      },
+      {
+        "key": "password",
+        "value": "{{basicAuthPassword}}"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "2a7058c5-7361-41b2-9057-66cb027f97c0",
+    "name": "Tvarka Atk Pairing API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Operations tagged Pairing across 2 of this provider's published API definitions: tvarka-atk-api-auth-openapi.yaml, tvarka-atk-api-openapi-original.json. Each path carries the servers of the definition it was published in.",
+      "type": "text/plain"
+    }
+  }
+}
