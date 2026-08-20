@@ -25,6 +25,23 @@ tags:
   - NFC
   - Timestamping
   - LTV
+  - Webhook
+  - Identity
+  - Trust Services
+  - GDPR
+tags_raw:
+  - Authentication
+  - Digital Signature
+  - eIDAS
+  - QES
+  - Lithuania
+  - OpenAPI
+  - eID
+  - Smart-ID
+  - Mobile-ID
+  - NFC
+  - Timestamping
+  - LTV
   - Webhooks
   - Identity
   - Trust Services
@@ -36,6 +53,8 @@ apis:
   humanURL: https://atk.tvarka.pro/docs/
   baseURL: https://atk.tvarka.pro/v1
   tags:
+  - Authentication
+  tags_raw:
   - Auth
   properties:
   - type: OpenAPI
@@ -145,7 +164,8 @@ apis:
     atk qes signing api (paid tier addendum).
   humanURL: https://atk.tvarka.pro/docs/
   baseURL: https://atk.tvarka.pro/v1
-  tags:
+  tags: []
+  tags_raw:
   - Tvarka ATK QES Signing API (paid Tier Addendum)
   properties:
   - type: OpenAPI
@@ -182,6 +202,8 @@ apis:
   humanURL: https://atk.tvarka.pro/docs/
   baseURL: https://atk.tvarka.pro/v1
   tags:
+  - .well Known
+  tags_raw:
   - Well-known
   properties:
   - type: OpenAPI
